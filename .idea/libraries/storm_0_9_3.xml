@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="storm-0.9.3">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/storm-0.9.3" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/lib/storm-0.9.3" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/lib/storm-0.9.3" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/storm-0.9.3" recursive="false" type="SOURCES" />
+  </library>
+</component>

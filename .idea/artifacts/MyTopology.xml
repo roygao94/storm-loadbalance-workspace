@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MyTopology">
+    <output-path>$PROJECT_DIR$/out/artifacts/MyTopology</output-path>
+    <root id="archive" name="MyTopology.jar">
+      <element id="module-output" name="storm-loadbalance-workspace" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/artifacts/MyTopology/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
