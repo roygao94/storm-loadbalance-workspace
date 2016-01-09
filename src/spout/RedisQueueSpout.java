@@ -29,12 +29,6 @@ public class RedisQueueSpout extends BaseRichSpout {
 		this.host = host;
 		this.port = port;
 		this.queue = queue;
-
-		try {
-			jedis = new Jedis(host, port);
-			len = jedis.llen(queue);
-		} catch (Exception e) {
-		}
 	}
 
 	@Override
@@ -49,10 +43,11 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 	@Override
 	public void nextTuple() {
+		Jedis jedis = getConnectedJedis();
 		if (jedis == null)
 			return;
 
-		Object text;
+		Object text = null;
 		try {
 			text = jedis.lindex(queue, count);
 			if (++count >= len)
@@ -60,6 +55,22 @@ public class RedisQueueSpout extends BaseRichSpout {
 		} catch (Exception e) {
 			disconnect();
 		}
+
+		if (text != null)
+			emitData(text);
+	}
+
+	private Jedis getConnectedJedis() {
+		if (jedis != null) {
+			return jedis;
+		}
+		//try connect to redis server
+		try {
+			jedis = new Jedis(host, port);
+			len = jedis.llen(queue);
+		} catch (Exception e) {
+		}
+		return jedis;
 	}
 
 	public void emitData(Object data) {

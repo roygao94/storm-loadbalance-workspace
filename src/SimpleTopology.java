@@ -14,7 +14,7 @@ public class SimpleTopology {
 	public static void main(String[] args) throws Exception {
 		TopologyBuilder builder = new TopologyBuilder();
 
-		builder.setSpout("spout", new RedisQueueSpout("10.11.1.56", 6379, "100000_0.85"), 5);
+		builder.setSpout("spout", new RedisQueueSpout("10.11.1.56", 6379, "10000_0.85"), 5);
 
 		builder.setBolt("ubolt", new UBolt(), 10).shuffleGrouping("spout");
 		builder.setBolt("dbolt", new DBolt(), 10).directGrouping("ubolt");
@@ -24,12 +24,13 @@ public class SimpleTopology {
 
 		if (args != null && args.length > 0) {
 			conf.setNumWorkers(10);
-			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+
+			StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
 		} else {
 			conf.setMaxTaskParallelism(3);
 
 			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology("simple-tpop", conf, builder.createTopology());
+			cluster.submitTopology("simple-topo", conf, builder.createTopology());
 
 			Thread.sleep(30000);
 
