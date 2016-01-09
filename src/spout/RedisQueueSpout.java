@@ -1,0 +1,77 @@
+package spout;
+
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import redis.clients.jedis.Jedis;
+
+import java.util.Arrays;
+import java.util.Map;
+
+/**
+ * Created by Roy Gao on 1/9/2016.
+ */
+public class RedisQueueSpout extends BaseRichSpout {
+
+	public static final String OUTPUT_FIELD = "text";
+	protected SpoutOutputCollector collector;
+
+	private String queue;
+	private String host;
+	private int port;
+	private long len = 0;
+	private static long count = 0;
+	private transient Jedis jedis = null;
+
+	public RedisQueueSpout(String host, int port, String queue) {
+		this.host = host;
+		this.port = port;
+		this.queue = queue;
+
+		try {
+			jedis = new Jedis(host, port);
+			len = jedis.llen(queue);
+		} catch (Exception e) {
+		}
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(OUTPUT_FIELD));
+	}
+
+	@Override
+	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+		this.collector = spoutOutputCollector;
+	}
+
+	@Override
+	public void nextTuple() {
+		if (jedis == null)
+			return;
+
+		Object text;
+		try {
+			text = jedis.lindex(queue, count);
+			if (++count >= len)
+				count = 0;
+		} catch (Exception e) {
+			disconnect();
+		}
+	}
+
+	public void emitData(Object data) {
+		collector.emit(Arrays.asList(data), data);
+	}
+
+	private void disconnect() {
+		try {
+			jedis.disconnect();
+		} catch (Exception e) {
+		}
+
+		jedis = null;
+	}
+}

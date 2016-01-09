@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="storm-0.10.0" level="project" />
+    <orderEntry type="library" name="jedis-2.6.0" level="project" />
   </component>
 </module>
