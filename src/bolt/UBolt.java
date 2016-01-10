@@ -21,6 +21,7 @@ public class UBolt implements IRichBolt {
 	OutputCollector collector;
 	int taskNumber;
 
+	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		routingTable = new HashMap<>();
 		this.collector = collector;
