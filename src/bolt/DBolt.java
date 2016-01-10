@@ -16,7 +16,6 @@ public class DBolt implements IRichBolt {
 
 	OutputCollector collector;
 
-
 	@Override
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
@@ -28,7 +27,7 @@ public class DBolt implements IRichBolt {
 		int g = (int) tuple.getValue(1);
 
 		for (int i = 0; i < g; ++i)
-			for (int j = 0; j < 100000; ++j);
+			for (int j = 0; j < 100000; ++j) ;
 
 		collector.ack(tuple);
 	}
