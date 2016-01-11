@@ -16,7 +16,7 @@ import java.util.Map;
 public class RedisQueueSpout extends BaseRichSpout {
 
 	public static final String OUTPUT_FIELD = "text";
-	protected SpoutOutputCollector collector;
+	protected SpoutOutputCollector _collector;
 
 	private String queue;
 	private String host;
@@ -38,7 +38,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 	@Override
 	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-		this.collector = spoutOutputCollector;
+		_collector = spoutOutputCollector;
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	}
 
 	public void emitData(Object data) {
-		collector.emit(Arrays.asList(data), data);
+		_collector.emit(Arrays.asList(data), data);
 	}
 
 	private void disconnect() {

@@ -18,13 +18,13 @@ public class UBolt implements IRichBolt {
 
 	Map<Integer, Integer> routingTable;
 	TopologyContext context;
-	OutputCollector collector;
+	OutputCollector _collector;
 	int taskNumber;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		routingTable = new HashMap<>();
-		this.collector = collector;
+		_collector = collector;
 		this.context = context;
 		taskNumber = context.getComponentTasks("dbolt").size();
 	}
@@ -37,8 +37,8 @@ public class UBolt implements IRichBolt {
 		int g = Integer.parseInt(split[1]);
 		int taskID = context.getComponentTasks("dbolt").get(key % taskNumber);
 
-		collector.emitDirect(taskID, tuple, new Values(key, g));
-		collector.ack(tuple);
+		_collector.emitDirect(taskID, tuple, new Values(key, g));
+		_collector.ack(tuple);
 	}
 
 	@Override

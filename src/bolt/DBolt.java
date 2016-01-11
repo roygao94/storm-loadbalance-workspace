@@ -14,11 +14,11 @@ import java.util.Map;
  */
 public class DBolt implements IRichBolt {
 
-	OutputCollector collector;
+	OutputCollector _collector;
 
 	@Override
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
-		this.collector = collector;
+		this._collector = collector;
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class DBolt implements IRichBolt {
 		for (int i = 0; i < g; ++i)
 			for (int j = 0; j < 100000; ++j) ;
 
-		collector.ack(tuple);
+		_collector.ack(tuple);
 	}
 
 	@Override
