@@ -18,7 +18,7 @@ public class DBolt implements IRichBolt {
 
 	@Override
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
-		this._collector = collector;
+		_collector = collector;
 	}
 
 	@Override
