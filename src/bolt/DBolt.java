@@ -27,9 +27,17 @@ public class DBolt implements IRichBolt {
 		int g = (int) tuple.getValue(1);
 
 		for (int i = 0; i < g; ++i)
-			for (int j = 0; j < 100000; ++j) ;
+//			for (int j = 0; j < 100000; ++j) ;
+             calculatePi();
 
 		_collector.ack(tuple);
+	}
+
+	private double calculatePi() {
+		double pi = 0;
+		for (int n = 0; n <= 5000; ++n)
+			pi += (n % 2 == 0 ? 1 : -1) / (2 * n + 1);
+		return pi;
 	}
 
 	@Override

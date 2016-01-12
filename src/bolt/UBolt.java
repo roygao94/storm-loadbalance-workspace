@@ -35,7 +35,7 @@ public class UBolt implements IRichBolt {
 		String[] split = line.split(",");
 		int key = Integer.parseInt(split[0]);
 		int g = Integer.parseInt(split[1]);
-		int taskID = context.getComponentTasks("dbolt").get(key % taskNumber);
+		int taskID = context.getComponentTasks("dbolt").get(routingTable.containsKey(key) ? routingTable.get(key) : key % taskNumber);
 
 		_collector.emitDirect(taskID, tuple, new Values(key, g));
 		_collector.ack(tuple);
