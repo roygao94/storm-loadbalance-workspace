@@ -5,6 +5,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
+import io.Parameters;
 import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;
@@ -18,17 +19,17 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public static final String OUTPUT_FIELD = "text";
 	protected SpoutOutputCollector _collector;
 
-	private String queue;
+//	private String queue;
 	private String host;
 	private int port;
 	private long len = 0;
 	private static long count = 0;
 	private transient Jedis jedis = null;
 
-	public RedisQueueSpout(String host, int port, String queue) {
+	public RedisQueueSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.queue = queue;
+//		this.queue = queue;
 	}
 
 	@Override
@@ -49,7 +50,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 		Object text = null;
 		try {
-			text = jedis.lindex(queue, count);
+			text = jedis.lindex(Parameters.REDIS_KGS, count);
 			if (++count >= len)
 				count = 0;
 		} catch (Exception e) {
@@ -67,7 +68,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 		//try connect to redis server
 		try {
 			jedis = new Jedis(host, port);
-			len = jedis.llen(queue);
+			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
 		}
 		return jedis;

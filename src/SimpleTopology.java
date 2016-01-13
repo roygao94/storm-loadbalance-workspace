@@ -4,6 +4,7 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import bolt.DBolt;
 import bolt.UBolt;
+import io.Parameters;
 import spout.RedisQueueSpout;
 
 /**
@@ -14,10 +15,10 @@ public class SimpleTopology {
 	public static void main(String[] args) throws Exception {
 		TopologyBuilder builder = new TopologyBuilder();
 
-		builder.setSpout("spout", new RedisQueueSpout("10.11.1.56", 6379, "10000_0.85"), 5);
+		builder.setSpout("spout", new RedisQueueSpout(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 5);
 
-		builder.setBolt("ubolt", new UBolt(), 10).shuffleGrouping("spout");
-		builder.setBolt("dbolt", new DBolt(), 10).directGrouping("ubolt");
+		builder.setBolt("ubolt", new UBolt(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 10).shuffleGrouping("spout");
+		builder.setBolt("dbolt", new DBolt(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 10).directGrouping("ubolt");
 
 		Config conf = new Config();
 		conf.setDebug(true);

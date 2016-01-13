@@ -15,10 +15,7 @@ import java.util.List;
 public class WriteDataToRedis {
 
 	private String host;
-	private int port = 6379;
-	private Jedis jedis = null;
-
-	private String keyName = "kgs";
+	private int port;
 
 	public static void main(String[] args) throws IOException {
 		WriteDataToRedis writer = new WriteDataToRedis();
@@ -26,15 +23,16 @@ public class WriteDataToRedis {
 	}
 
 	private WriteDataToRedis() {
-		host = Parameters.localMode ? "192.168.56.143" : "10.11.1.56";
+		host = Parameters.localMode ? Parameters.REDIS_VM : Parameters.REDIS_REMOTE;
+		port = Parameters.REDIS_PORT;
 	}
 
 	public void writeToRedis() throws IOException {
 		String line;
 		int val;
 //		System.out.println(host);
-		jedis = new Jedis(host, port);
-		if (!jedis.exists(keyName)) {
+		Jedis jedis = new Jedis(host, port);
+		if (!jedis.exists(Parameters.REDIS_KGS)) {
 			BufferedReader reader = new BufferedReader(new FileReader("equal-10000.txt"));
 			List<Integer> gList = new ArrayList<>();
 
@@ -45,7 +43,7 @@ public class WriteDataToRedis {
 			reader.close();
 
 			for (int i = 0; i < gList.size(); ++i)
-				jedis.lpush(keyName, i + "," + gList.get(i));
+				jedis.lpush(Parameters.REDIS_KGS, i + "," + gList.get(i));
 		}
 		jedis.disconnect();
 	}

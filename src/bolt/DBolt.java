@@ -6,7 +6,11 @@ import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import io.KGS;
+import io.Parameters;
+import redis.clients.jedis.Jedis;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,22 +19,50 @@ import java.util.Map;
 public class DBolt implements IRichBolt {
 
 	OutputCollector _collector;
+	String ID;
+
+	private Jedis jedis;
+
+	private Map<Integer, KGS> infoList = new HashMap<>();
+
+	public DBolt(String host, int port) {
+		jedis = new Jedis(host, port);
+	}
 
 	@Override
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
+		ID = context.getThisComponentId();
 	}
 
 	@Override
 	public void execute(Tuple tuple) {
-		int key = (int) tuple.getValue(0);
-		int g = (int) tuple.getValue(1);
+		if (jedis.exists(Parameters.REDIS_SUM + ID)) {
+			// emit sum to Controller
 
-		for (int i = 0; i < g; ++i)
-//			for (int j = 0; j < 100000; ++j) ;
-             calculatePi();
+		} else if (jedis.exists(Parameters.REDIS_DETAIL + ID)) {
+			// emit detail to Controller
+
+		} else {
+			// record kgs info and put pressure
+			int key = (int) tuple.getValue(0);
+			int g = (int) tuple.getValue(1);
+
+			recordInfo(key, g, 1);
+			for (int i = 0; i < g; ++i)
+				calculatePi();
+		}
 
 		_collector.ack(tuple);
+	}
+
+	private void recordInfo(int key, int g, int s) {
+		if (!infoList.containsKey(key))
+			infoList.put(key, new KGS(key, g, s));
+		else {
+			infoList.get(key).addG(g);
+			infoList.get(key).addS(s);
+		}
 	}
 
 	private double calculatePi() {

@@ -33,6 +33,22 @@ public class KGS implements Comparable<KGS> {
 		return s;
 	}
 
+	public void setG(int g) {
+		this.g = g;
+	}
+
+	public void setS(int s) {
+		this.s = s;
+	}
+
+	public void addG(int g) {
+		this.g += g;
+	}
+
+	public void addS(int s) {
+		this.s += s;
+	}
+
 	public String toString() {
 		return key + "\t" + g + "\t" + s;
 	}

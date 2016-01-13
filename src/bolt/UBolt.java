@@ -7,6 +7,8 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import io.Parameters;
+import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,21 +18,34 @@ import java.util.Map;
  */
 public class UBolt implements IRichBolt {
 
-	Map<Integer, Integer> routingTable;
 	TopologyContext context;
 	OutputCollector _collector;
+	String ID;
 	int taskNumber;
+
+	private Jedis jedis;
+
+	Map<Integer, Integer> routingTable;
+
+	public UBolt(String host, int port) {
+		jedis = new Jedis(host, port);
+	}
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		routingTable = new HashMap<>();
-		_collector = collector;
 		this.context = context;
+		_collector = collector;
+		ID = context.getThisComponentId();
 		taskNumber = context.getComponentTasks("dbolt").size();
 	}
 
 	@Override
 	public void execute(Tuple tuple) {
+		if (jedis.exists(Parameters.REDIS_RT + ID)) {
+			// update routing table
+
+		}
 		String line = tuple.getString(0);
 		String[] split = line.split(",");
 		int key = Integer.parseInt(split[0]);
