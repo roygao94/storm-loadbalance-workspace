@@ -19,7 +19,6 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public static final String OUTPUT_FIELD = "text";
 	protected SpoutOutputCollector _collector;
 
-//	private String queue;
 	private String host;
 	private int port;
 	private long len = 0;
@@ -29,7 +28,6 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public RedisQueueSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
-//		this.queue = queue;
 	}
 
 	@Override
@@ -62,15 +60,15 @@ public class RedisQueueSpout extends BaseRichSpout {
 	}
 
 	private Jedis getConnectedJedis() {
-		if (jedis != null) {
+		if (jedis != null)
 			return jedis;
-		}
-		//try connect to redis server
+
 		try {
 			jedis = new Jedis(host, port);
 			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
 		}
+
 		return jedis;
 	}
 

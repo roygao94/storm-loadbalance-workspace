@@ -21,12 +21,15 @@ public class DBolt implements IRichBolt {
 	OutputCollector _collector;
 	String ID;
 
-	private Jedis jedis;
+	private String host;
+	private int port;
+	private transient Jedis jedis;
 
 	private Map<Integer, KGS> infoList = new HashMap<>();
 
 	public DBolt(String host, int port) {
-		jedis = new Jedis(host, port);
+		this.host = host;
+		this.port = port;
 	}
 
 	@Override
@@ -37,6 +40,7 @@ public class DBolt implements IRichBolt {
 
 	@Override
 	public void execute(Tuple tuple) {
+		Jedis jedis = getConnectedJedis();
 		if (jedis.exists(Parameters.REDIS_SUM + ID)) {
 			// emit sum to Controller
 
@@ -84,5 +88,17 @@ public class DBolt implements IRichBolt {
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
+	}
+
+	private Jedis getConnectedJedis() {
+		if (jedis != null)
+			return jedis;
+
+		try {
+			jedis = new Jedis(host, port);
+		} catch (Exception e) {
+		}
+
+		return jedis;
 	}
 }

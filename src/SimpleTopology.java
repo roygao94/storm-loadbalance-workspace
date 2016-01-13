@@ -15,7 +15,7 @@ public class SimpleTopology {
 	public static void main(String[] args) throws Exception {
 		TopologyBuilder builder = new TopologyBuilder();
 
-		builder.setSpout("spout", new RedisQueueSpout(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 5);
+		builder.setSpout("spout", new RedisQueueSpout(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 1);
 
 		builder.setBolt("ubolt", new UBolt(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 10).shuffleGrouping("spout");
 		builder.setBolt("dbolt", new DBolt(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT), 10).directGrouping("ubolt");

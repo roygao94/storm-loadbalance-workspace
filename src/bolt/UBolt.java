@@ -23,12 +23,15 @@ public class UBolt implements IRichBolt {
 	String ID;
 	int taskNumber;
 
-	private Jedis jedis;
+	private String host;
+	private int port;
+	private transient Jedis jedis;
 
 	Map<Integer, Integer> routingTable;
 
 	public UBolt(String host, int port) {
-		jedis = new Jedis(host, port);
+		this.host = host;
+		this.port = port;
 	}
 
 	@Override
@@ -42,10 +45,12 @@ public class UBolt implements IRichBolt {
 
 	@Override
 	public void execute(Tuple tuple) {
+		Jedis jedis = getConnectedJedis();
 		if (jedis.exists(Parameters.REDIS_RT + ID)) {
 			// update routing table
 
 		}
+
 		String line = tuple.getString(0);
 		String[] split = line.split(",");
 		int key = Integer.parseInt(split[0]);
@@ -68,5 +73,17 @@ public class UBolt implements IRichBolt {
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
+	}
+
+	private Jedis getConnectedJedis() {
+		if (jedis != null)
+			return jedis;
+
+		try {
+			jedis = new Jedis(host, port);
+		} catch (Exception e) {
+		}
+
+		return jedis;
 	}
 }
