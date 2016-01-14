@@ -67,6 +67,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 			jedis = new Jedis(host, port);
 			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return jedis;
@@ -80,6 +81,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 		try {
 			jedis.disconnect();
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		jedis = null;

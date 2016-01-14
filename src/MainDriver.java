@@ -2,10 +2,12 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
+import bolt.Controller;
 import bolt.DBolt;
 import bolt.UBolt;
 import io.Parameters;
 import spout.RedisQueueSpout;
+import util.ReportManager;
 import util.WriteDataToRedis;
 
 /**
@@ -20,6 +22,8 @@ public class MainDriver {
 	public static void main(String[] args) throws Exception {
 
 		TopologyBuilder builder = new TopologyBuilder();
+		ReportManager manager = new ReportManager();
+
 		Config conf = new Config();
 		conf.setDebug(true);
 
@@ -27,11 +31,13 @@ public class MainDriver {
 			// default: local mode
 			WriteDataToRedis.writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
 
-			setTopology(builder, Parameters.REDIS_LOCAL);
+			setTopology(builder, manager, Parameters.REDIS_LOCAL);
 			conf.setMaxTaskParallelism(3);
 
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("load-balance-driver", conf, builder.createTopology());
+
+			manager.run();
 
 			Thread.sleep(30000);
 			cluster.shutdown();
@@ -42,28 +48,35 @@ public class MainDriver {
 				// local mode
 				WriteDataToRedis.writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
 
-				setTopology(builder, Parameters.REDIS_LOCAL);
+				setTopology(builder, manager, Parameters.REDIS_LOCAL);
 				conf.setNumWorkers(10);
 				StormSubmitter.submitTopologyWithProgressBar(taskName, conf, builder.createTopology());
+
+				manager.run();
 
 			} else if (args[1].equals("remote")) {
 				// remote mode
 				WriteDataToRedis.writeToRedis(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT);
 
-				setTopology(builder, Parameters.REDIS_REMOTE);
+				setTopology(builder, manager, Parameters.REDIS_REMOTE);
 				conf.setNumWorkers(10);
 				StormSubmitter.submitTopologyWithProgressBar(taskName, conf, builder.createTopology());
+
+				manager.run();
 
 			} else errorArgs();
 
 		} else errorArgs();
 	}
 
-	private static void setTopology(TopologyBuilder builder, String mode) {
+	private static void setTopology(TopologyBuilder builder, ReportManager manager, String mode) {
 		builder.setSpout("spout", new RedisQueueSpout(mode, Parameters.REDIS_PORT), 1);
 
 		builder.setBolt("u-bolt", new UBolt(mode, Parameters.REDIS_PORT), 10).shuffleGrouping("spout");
 		builder.setBolt("d-bolt", new DBolt(mode, Parameters.REDIS_PORT), 10).directGrouping("u-bolt");
+		builder.setBolt("controller", new Controller(mode, Parameters.REDIS_PORT), 1).directGrouping("d-bolt");
+
+		manager.initialize(mode, Parameters.REDIS_PORT, 10);
 	}
 
 	private static void errorArgs() {

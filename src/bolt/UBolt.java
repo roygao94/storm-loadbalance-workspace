@@ -20,7 +20,7 @@ public class UBolt implements IRichBolt {
 
 	TopologyContext context;
 	OutputCollector _collector;
-	String ID;
+	int myNumber;
 	int DBoltNumber;
 
 	private String host;
@@ -39,14 +39,14 @@ public class UBolt implements IRichBolt {
 		routingTable = new HashMap<>();
 		this.context = context;
 		_collector = collector;
-		ID = context.getThisComponentId();
+		myNumber = context.getThisTaskIndex();
 		DBoltNumber = context.getComponentTasks("d-bolt").size();
 	}
 
 	@Override
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
-		if (jedis.exists(Parameters.REDIS_RT + ID)) {
+		if (jedis.exists(Parameters.REDIS_RT + myNumber)) {
 			// update routing table
 
 		}
@@ -82,6 +82,7 @@ public class UBolt implements IRichBolt {
 		try {
 			jedis = new Jedis(host, port);
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return jedis;

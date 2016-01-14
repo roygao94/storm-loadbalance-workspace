@@ -11,9 +11,10 @@ public class Parameters {
 	public static final int REDIS_PORT = 6379;
 	public static final String REDIS_RT = "rt";
 	public static final String REDIS_KGS = "kgs";
-	public static final String REDIS_SUM = "sum";
+	public static final String REDIS_LOAD = "load";
+	public static final String REDIS_LOAD_REPORT = "load-report";
 	public static final String REDIS_DETAIL = "detail";
+	public static final String REDIS_DETAIL_REPORT = "detail-report";
 
-
-	public static boolean localMode = false;
+	public static double balancedIndex = 1.1;
 }

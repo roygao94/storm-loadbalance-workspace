@@ -6,6 +6,7 @@ import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
 import io.KGS;
 import io.Parameters;
 import redis.clients.jedis.Jedis;
@@ -18,14 +19,16 @@ import java.util.Map;
  */
 public class DBolt implements IRichBolt {
 
+	TopologyContext context;
 	OutputCollector _collector;
-	String ID;
+	int myNumber;
 
 	private String host;
 	private int port;
 	private transient Jedis jedis;
 
 	private Map<Integer, KGS> infoList = new HashMap<>();
+	private int load;
 
 	public DBolt(String host, int port) {
 		this.host = host;
@@ -34,17 +37,24 @@ public class DBolt implements IRichBolt {
 
 	@Override
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
+		this.context = context;
 		_collector = collector;
-		ID = context.getThisComponentId();
+		myNumber = context.getThisTaskIndex();
+		load = 0;
 	}
 
 	@Override
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
-		if (jedis.exists(Parameters.REDIS_SUM + ID)) {
-			// emit sum to Controller
 
-		} else if (jedis.exists(Parameters.REDIS_DETAIL + ID)) {
+		if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
+			// emit sum to Controller
+			_collector.emitDirect(context.getComponentTasks("controller").get(0),
+					new Values(Parameters.REDIS_LOAD_REPORT, myNumber, load));
+			load = 0;
+			jedis.del("sum" + myNumber);
+
+		} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
 			// emit detail to Controller
 
 		} else {
@@ -97,6 +107,7 @@ public class DBolt implements IRichBolt {
 		try {
 			jedis = new Jedis(host, port);
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return jedis;
