@@ -6,6 +6,7 @@ import bolt.Controller;
 import bolt.DBolt;
 import bolt.UBolt;
 import io.Parameters;
+import redis.clients.jedis.Jedis;
 import spout.RedisQueueSpout;
 import util.ReportManager;
 import util.WriteDataToRedis;
@@ -30,14 +31,17 @@ public class MainDriver {
 		if (args.length == 0) {
 			// default: local mode
 			WriteDataToRedis.writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
+			redisCleanUp(Parameters.REDIS_LOCAL);
 
 			setTopology(builder, manager, Parameters.REDIS_LOCAL);
+			manager.setLimit(30000);
 			conf.setMaxTaskParallelism(3);
 
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("load-balance-driver", conf, builder.createTopology());
 
-			manager.run();
+			Thread thread = new Thread(manager);
+			thread.start();
 
 			Thread.sleep(30000);
 			cluster.shutdown();
@@ -47,6 +51,7 @@ public class MainDriver {
 			if (args[1].equals("local")) {
 				// local mode
 				WriteDataToRedis.writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
+				redisCleanUp(Parameters.REDIS_LOCAL);
 
 				setTopology(builder, manager, Parameters.REDIS_LOCAL);
 				conf.setNumWorkers(10);
@@ -57,6 +62,7 @@ public class MainDriver {
 			} else if (args[1].equals("remote")) {
 				// remote mode
 				WriteDataToRedis.writeToRedis(Parameters.REDIS_REMOTE, Parameters.REDIS_PORT);
+				redisCleanUp(Parameters.REDIS_REMOTE);
 
 				setTopology(builder, manager, Parameters.REDIS_REMOTE);
 				conf.setNumWorkers(10);
@@ -67,6 +73,19 @@ public class MainDriver {
 			} else errorArgs();
 
 		} else errorArgs();
+	}
+
+	private static void redisCleanUp(String mode) {
+		Jedis jedis = new Jedis(mode, Parameters.REDIS_PORT);
+
+		for (int i = 0; i < 10; ++i) {
+			if (jedis.exists(Parameters.REDIS_LOAD + i))
+				jedis.del(Parameters.REDIS_LOAD + i);
+			if (jedis.exists(Parameters.REDIS_DETAIL + i))
+				jedis.del(Parameters.REDIS_DETAIL + i);
+		}
+
+		jedis.disconnect();
 	}
 
 	private static void setTopology(TopologyBuilder builder, ReportManager manager, String mode) {

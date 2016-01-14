@@ -1,5 +1,6 @@
 package bolt;
 
+import backtype.storm.metric.SystemBolt;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -11,8 +12,7 @@ import io.KGS;
 import io.Parameters;
 import redis.clients.jedis.Jedis;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Roy Gao on 1/9/2016.
@@ -50,7 +50,7 @@ public class DBolt implements IRichBolt {
 		if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
 			// emit sum to Controller
 			_collector.emitDirect(context.getComponentTasks("controller").get(0),
-					new Values(Parameters.REDIS_LOAD_REPORT, myNumber, load));
+					new Values(Parameters.REDIS_LOAD_REPORT, myNumber, load, ""));
 			load = 0;
 			jedis.del(Parameters.REDIS_LOAD + myNumber);
 
@@ -92,7 +92,7 @@ public class DBolt implements IRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("key", "g"));
+		declarer.declare(new Fields("report-head", "id", "load", "detail"));
 	}
 
 	@Override
