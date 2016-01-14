@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MainDriver">
+    <output-path>$PROJECT_DIR$/out/artifacts/MainDriver</output-path>
+    <root id="archive" name="MainDriver.jar">
+      <element id="module-output" name="storm-loadbalance-workspace" />
+      <element id="dir-copy" path="$PROJECT_DIR$/out/jedis-2.6.0" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/artifacts/MainDriver/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

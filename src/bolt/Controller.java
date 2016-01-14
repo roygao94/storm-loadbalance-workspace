@@ -32,7 +32,7 @@ public class Controller implements IRichBolt {
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		_collector = collector;
-		DBoltNumber = context.getComponentTasks("dbolt").size();
+		DBoltNumber = context.getComponentTasks("d-bolt").size();
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class Controller implements IRichBolt {
 			Thread.sleep(10000);
 
 			for (int i = 0; i < DBoltNumber; ++i)
-				jedis.lpush(Parameters.REDIS_SUM + context.getComponentTasks("dbolt").get(i));
+				jedis.lpush(Parameters.REDIS_SUM + context.getComponentTasks("d-bolt").get(i));
 
 		} catch (Exception e) {
 		}
