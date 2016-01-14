@@ -18,13 +18,13 @@ public class WriteDataToRedis {
 	private int port;
 
 	public static void main(String[] args) throws IOException {
-		WriteDataToRedis writer = new WriteDataToRedis();
-		writer.writeToRedis();
+		writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
+//		writer.writeToRedis();
 	}
 
-	private WriteDataToRedis() {
-		host = Parameters.localMode ? Parameters.REDIS_VM : Parameters.REDIS_REMOTE;
-		port = Parameters.REDIS_PORT;
+	public WriteDataToRedis(String host, int port) {
+		this.host = host;
+		this.port = port;
 	}
 
 	public void writeToRedis() throws IOException {
@@ -32,6 +32,27 @@ public class WriteDataToRedis {
 		int val;
 //		System.out.println(host);
 		Jedis jedis = new Jedis(host, port);
+		if (!jedis.exists(Parameters.REDIS_KGS)) {
+			BufferedReader reader = new BufferedReader(new FileReader("equal-10000.txt"));
+			List<Integer> gList = new ArrayList<>();
+
+			while ((line = reader.readLine()) != null) {
+				val = Integer.parseInt(line);
+				gList.add(val);
+			}
+			reader.close();
+
+			for (int i = 0; i < gList.size(); ++i)
+				jedis.lpush(Parameters.REDIS_KGS, i + "," + gList.get(i));
+		}
+		jedis.disconnect();
+	}
+
+	public static void writeToRedis(String host, int port) throws IOException {
+		String line;
+		int val;
+		Jedis jedis = new Jedis(host, port);
+
 		if (!jedis.exists(Parameters.REDIS_KGS)) {
 			BufferedReader reader = new BufferedReader(new FileReader("equal-10000.txt"));
 			List<Integer> gList = new ArrayList<>();
