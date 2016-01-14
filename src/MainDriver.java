@@ -41,6 +41,7 @@ public class MainDriver {
 			cluster.submitTopology("load-balance-driver", conf, builder.createTopology());
 
 			Thread thread = new Thread(manager);
+//			thread.setDaemon(true);
 			thread.start();
 
 			Thread.sleep(30000);
@@ -57,7 +58,9 @@ public class MainDriver {
 				conf.setNumWorkers(10);
 				StormSubmitter.submitTopologyWithProgressBar(taskName, conf, builder.createTopology());
 
-				manager.run();
+				Thread thread = new Thread(manager);
+//			thread.setDaemon(true);
+				thread.start();
 
 			} else if (args[1].equals("remote")) {
 				// remote mode
@@ -68,7 +71,9 @@ public class MainDriver {
 				conf.setNumWorkers(10);
 				StormSubmitter.submitTopologyWithProgressBar(taskName, conf, builder.createTopology());
 
-				manager.run();
+				Thread thread = new Thread(manager);
+//			thread.setDaemon(true);
+				thread.start();
 
 			} else errorArgs();
 

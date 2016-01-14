@@ -1,6 +1,5 @@
 package bolt;
 
-import backtype.storm.metric.SystemBolt;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -12,7 +11,8 @@ import io.KGS;
 import io.Parameters;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Roy Gao on 1/9/2016.
