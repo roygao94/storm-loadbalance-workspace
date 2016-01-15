@@ -16,5 +16,7 @@ public class Parameters {
 	public static final String REDIS_DETAIL = "detail";
 	public static final String REDIS_DETAIL_REPORT = "detail-report";
 
-	public static double balancedIndex = 1.1;
+	public static double BALANCED_INDEX = 1.1;
+
+	public static long REPORT_TIME = 10000;
 }

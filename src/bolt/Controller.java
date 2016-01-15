@@ -64,7 +64,7 @@ public class Controller implements IRichBolt {
 				boolean balanced = true;
 
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
-					if (entry.getValue() > average * Parameters.balancedIndex) {
+					if (entry.getValue() > average * Parameters.BALANCED_INDEX) {
 						balanced = false;
 //						for (int i = 0; i < DBoltNumber; ++i)
 //							jedis.lpush(Parameters.REDIS_DETAIL + i);
@@ -79,7 +79,7 @@ public class Controller implements IRichBolt {
 				loadList.clear();
 			}
 
-		} else if (reportHead.equals("detail-report")) {
+		} else if (reportHead.equals(Parameters.REDIS_DETAIL_REPORT)) {
 			// receive detail report from DBolt
 
 		}
