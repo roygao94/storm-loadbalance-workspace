@@ -31,17 +31,17 @@ public class ReportManager implements Runnable {
 	@Override
 	public void run() {
 		Jedis jedis = new Jedis(host, port);
-		long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis(), last = start;
 		while (true) {
 			for (int i = 0; i < 1000; ++i) ;
-			if (System.currentTimeMillis() - start > 10000) {
+			if (System.currentTimeMillis() - last > 10000) {
 				for (int i = 0; i < DBoltNumber; ++i)
 					jedis.lpush(Parameters.REDIS_LOAD + i, "");
 
 				if (limit > 0 && System.currentTimeMillis() - start > limit)
 					break;
 
-				start = System.currentTimeMillis();
+				last = System.currentTimeMillis();
 			}
 		}
 	}
