@@ -11,8 +11,7 @@ import io.KGS;
 import io.Parameters;
 import redis.clients.jedis.Jedis;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Roy Gao on 1/9/2016.
@@ -56,6 +55,11 @@ public class DBolt implements IRichBolt {
 
 		} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
 			// emit detail to Controller
+			String detailInfo = getDetailInfo();
+			_collector.emitDirect(context.getComponentTasks("controller").get(0),
+					new Values(Parameters.REDIS_DETAIL_REPORT, myNumber, load, detailInfo));
+			// infoList.clear();
+			jedis.del(Parameters.REDIS_DETAIL + myNumber);
 
 		} else {
 			// record kgs info and put pressure
@@ -68,6 +72,25 @@ public class DBolt implements IRichBolt {
 		}
 
 		_collector.ack(tuple);
+	}
+
+	private String getDetailInfo() {
+		String detailInfo = "";
+		List<Map.Entry<Integer, KGS>> tempList = new ArrayList<>(infoList.entrySet());
+
+		Collections.sort(tempList, new Comparator<Map.Entry<Integer, KGS>>() {
+			@Override
+			public int compare(Map.Entry<Integer, KGS> o1, Map.Entry<Integer, KGS> o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+
+		for (Map.Entry<Integer, KGS> entry : tempList)
+			detailInfo += entry.getValue().getKey() + ","
+					+ entry.getValue().getG() + ","
+					+ entry.getValue().getS() + "\t";
+
+		return detailInfo;
 	}
 
 	private void recordInfo(int key, int g, int s) {
