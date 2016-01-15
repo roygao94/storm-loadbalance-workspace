@@ -11,10 +11,10 @@ public class ReportManager implements Runnable {
 	private String host;
 	int port;
 	int DBoltNumber;
-	int limit = -1;
+	long limit = -1;
 
 	public ReportManager() {
-		host = Parameters.REDIS_REMOTE;
+		host = Parameters.REMOTE_HOST;
 		port = Parameters.REDIS_PORT;
 	}
 
@@ -24,7 +24,7 @@ public class ReportManager implements Runnable {
 		this.DBoltNumber = DBoltNumber;
 	}
 
-	public void setLimit(int limit) {
+	public void setLimit(long limit) {
 		this.limit = limit;
 	}
 
@@ -34,7 +34,7 @@ public class ReportManager implements Runnable {
 		long start = System.currentTimeMillis(), last = start;
 		while (true) {
 			for (int i = 0; i < 1000; ++i) ;
-			if (System.currentTimeMillis() - last > 10000) {
+			if (System.currentTimeMillis() - last > Parameters.REPORT_TIME) {
 				for (int i = 0; i < DBoltNumber; ++i)
 					jedis.lpush(Parameters.REDIS_LOAD + i, "");
 

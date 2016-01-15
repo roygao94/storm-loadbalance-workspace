@@ -38,7 +38,7 @@ public class Controller implements IRichBolt {
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		_collector = collector;
-		DBoltNumber = context.getComponentTasks("d-bolt").size();
+		DBoltNumber = context.getComponentTasks(Parameters.CONTROLLER_NAME).size();
 
 		loadList = new HashMap<>();
 		detailList = new HashMap<>();
@@ -60,7 +60,7 @@ public class Controller implements IRichBolt {
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
 					sum += entry.getValue();
 
-				int average = sum / context.getComponentTasks("d-bolt").size();
+				int average = sum / context.getComponentTasks(Parameters.CONTROLLER_NAME).size();
 				boolean balanced = true;
 
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())

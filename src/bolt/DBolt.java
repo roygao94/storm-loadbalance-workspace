@@ -48,7 +48,7 @@ public class DBolt implements IRichBolt {
 
 		if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
 			// emit sum to Controller
-			_collector.emitDirect(context.getComponentTasks("controller").get(0),
+			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
 					new Values(Parameters.REDIS_LOAD_REPORT, myNumber, load, ""));
 			load = 0;
 			jedis.del(Parameters.REDIS_LOAD + myNumber);
@@ -56,7 +56,7 @@ public class DBolt implements IRichBolt {
 		} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
 			// emit detail to Controller
 			String detailInfo = getDetailInfo();
-			_collector.emitDirect(context.getComponentTasks("controller").get(0),
+			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
 					new Values(Parameters.REDIS_DETAIL_REPORT, myNumber, load, detailInfo));
 			// infoList.clear();
 			jedis.del(Parameters.REDIS_DETAIL + myNumber);

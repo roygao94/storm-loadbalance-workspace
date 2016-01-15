@@ -18,7 +18,7 @@ public class WriteDataToRedis {
 	private int port;
 
 	public static void main(String[] args) throws IOException {
-		writeToRedis(Parameters.REDIS_LOCAL, Parameters.REDIS_PORT);
+		writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
 //		writer.writeToRedis();
 	}
 

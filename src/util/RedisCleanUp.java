@@ -9,7 +9,7 @@ import redis.clients.jedis.Jedis;
 public class RedisCleanUp {
 
 	public static void main(String[] args) {
-		redisCleanUp(Parameters.REDIS_REMOTE);
+		redisCleanUp(Parameters.REMOTE_HOST);
 	}
 
 	public static void redisCleanUp(String mode) {

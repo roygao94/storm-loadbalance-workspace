@@ -40,7 +40,7 @@ public class UBolt implements IRichBolt {
 		this.context = context;
 		_collector = collector;
 		myNumber = context.getThisTaskIndex();
-		DBoltNumber = context.getComponentTasks("d-bolt").size();
+		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
 	}
 
 	@Override
@@ -55,7 +55,8 @@ public class UBolt implements IRichBolt {
 		String[] split = line.split(",");
 		int key = Integer.parseInt(split[0]);
 		int g = Integer.parseInt(split[1]);
-		int taskID = context.getComponentTasks("d-bolt").get(routingTable.containsKey(key) ? routingTable.get(key) : key % DBoltNumber);
+		int taskID = context.getComponentTasks(Parameters.DBOLT_NAME).get(routingTable.containsKey(key) ?
+				routingTable.get(key) : key % DBoltNumber);
 
 		_collector.emitDirect(taskID, tuple, new Values(key, g));
 		_collector.ack(tuple);
