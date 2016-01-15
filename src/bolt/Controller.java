@@ -5,12 +5,12 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
+import balancing.ReBalance;
+import io.NodeWithCursor;
 import io.Parameters;
 import redis.clients.jedis.Jedis;
-import util.ReportManager;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,7 +27,7 @@ public class Controller implements IRichBolt {
 	private transient Jedis jedis;
 
 	private Map<Integer, Integer> loadList;
-	private Map<Integer, Integer> detailList;
+	private Map<Integer, NodeWithCursor> detailList;
 
 	public Controller(String host, int port) {
 		this.host = host;
@@ -66,8 +66,8 @@ public class Controller implements IRichBolt {
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
 					if (entry.getValue() > average * Parameters.BALANCED_INDEX) {
 						balanced = false;
-//						for (int i = 0; i < DBoltNumber; ++i)
-//							jedis.lpush(Parameters.REDIS_DETAIL + i);
+						for (int i = 0; i < DBoltNumber; ++i)
+							jedis.lpush(Parameters.REDIS_DETAIL + i);
 						break;
 					}
 
@@ -81,6 +81,17 @@ public class Controller implements IRichBolt {
 
 		} else if (reportHead.equals(Parameters.REDIS_DETAIL_REPORT)) {
 			// receive detail report from DBolt
+			int boltNumber = (int) tuple.getValue(1);
+			NodeWithCursor node = new NodeWithCursor(boltNumber, tuple.getValue(3).toString());
+			detailList.put(boltNumber, node);
+
+			if (detailList.size() == context.getComponentTasks("DBolt").size()) {
+				ReBalance.reBalance(detailList);
+
+				// send massage to update routing table and adjust bolts
+
+				detailList.clear();
+			}
 
 		}
 	}
