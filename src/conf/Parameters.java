@@ -28,5 +28,11 @@ public class Parameters {
 	public static long REPORT_TIME = 10000;
 	public static final long LOCAL_TIME = 50000;
 
+	public static final int KEY_NUMBER = 10000;
+	public static int DBOLT_NUMBER = 10;
+
+	public static int WINDOW_SIZE = 5;
+	public static int POW_EXP = 3;
+
 	public static double BALANCED_INDEX = 1.1;
 }

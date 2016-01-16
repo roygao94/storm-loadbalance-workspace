@@ -5,7 +5,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
-import balancing.ReBalance;
+import balancing.Balancer;
 import balancing.io.NodeWithCursor;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
@@ -95,7 +95,7 @@ public class Controller implements IRichBolt {
 
 			if (detailList.size() == DBoltNumber) {
 				jedis.lpush(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
-				ReBalance.reBalance(detailList);
+				Balancer.reBalance(detailList);
 
 				// send massage to update routing table and adjust bolts
 
