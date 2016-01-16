@@ -1,4 +1,4 @@
-package io;
+package balancing.io;
 
 import java.util.HashMap;
 import java.util.Map;

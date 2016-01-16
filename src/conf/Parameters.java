@@ -1,4 +1,4 @@
-package io;
+package conf;
 
 /**
  * Created by roy on 1/12/16.

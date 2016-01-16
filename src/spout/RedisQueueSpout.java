@@ -5,7 +5,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
-import io.Parameters;
+import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;

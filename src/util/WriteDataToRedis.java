@@ -1,6 +1,6 @@
 package util;
 
-import io.Parameters;
+import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;

@@ -1,6 +1,6 @@
 package balancing;
 
-import io.NodeWithCursor;
+import balancing.io.NodeWithCursor;
 
 import java.util.Map;
 

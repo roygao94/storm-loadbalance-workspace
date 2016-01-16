@@ -7,7 +7,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import io.Parameters;
+import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;

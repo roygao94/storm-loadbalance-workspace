@@ -6,8 +6,8 @@ import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import balancing.ReBalance;
-import io.NodeWithCursor;
-import io.Parameters;
+import balancing.io.NodeWithCursor;
+import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
@@ -72,9 +72,11 @@ public class Controller implements IRichBolt {
 					}
 
 				if (balanced)
-					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ balanced");
+//					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ balanced");
+					jedis.lpush("balanced", "");
 				else
-					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ NOT balanced");
+//					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ NOT balanced");
+					jedis.lpush("imbalanced", "");
 
 				loadList.clear();
 			}
@@ -85,7 +87,7 @@ public class Controller implements IRichBolt {
 			NodeWithCursor node = new NodeWithCursor(boltNumber, tuple.getValue(3).toString());
 			detailList.put(boltNumber, node);
 
-			if (detailList.size() == context.getComponentTasks("DBolt").size()) {
+			if (detailList.size() == context.getComponentTasks(Parameters.DBOLT_NAME).size()) {
 				ReBalance.reBalance(detailList);
 
 				// send massage to update routing table and adjust bolts

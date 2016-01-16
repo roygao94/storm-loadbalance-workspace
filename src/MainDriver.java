@@ -5,7 +5,7 @@ import backtype.storm.topology.TopologyBuilder;
 import bolt.Controller;
 import bolt.DBolt;
 import bolt.UBolt;
-import io.Parameters;
+import conf.Parameters;
 import spout.RedisQueueSpout;
 import util.RedisCleanUp;
 import util.ReportManager;
