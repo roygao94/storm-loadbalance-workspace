@@ -28,6 +28,8 @@ public class DBolt implements IRichBolt {
 
 	private Map<Integer, KGS> infoList = new HashMap<>();
 	private int load;
+	private int loadReportRound;
+	private int detailReportRound;
 
 	public DBolt(String host, int port) {
 		this.host = host;
@@ -40,6 +42,7 @@ public class DBolt implements IRichBolt {
 		_collector = collector;
 		myNumber = context.getThisTaskIndex();
 		load = 0;
+		loadReportRound = detailReportRound = 0;
 	}
 
 	@Override
@@ -49,7 +52,8 @@ public class DBolt implements IRichBolt {
 		if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
 			// emit sum to Controller
 			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_LOAD_REPORT, myNumber, load, ""));
+					new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
+			// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
 			load = 0;
 			jedis.del(Parameters.REDIS_LOAD + myNumber);
 
@@ -57,7 +61,7 @@ public class DBolt implements IRichBolt {
 			// emit detail to Controller
 			String detailInfo = getDetailInfo();
 			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_DETAIL_REPORT, myNumber, load, detailInfo));
+					new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
 			// infoList.clear();
 			jedis.del(Parameters.REDIS_DETAIL + myNumber);
 
@@ -94,6 +98,7 @@ public class DBolt implements IRichBolt {
 	}
 
 	private void recordInfo(int key, int g, int s) {
+		load += g;
 		if (!infoList.containsKey(key))
 			infoList.put(key, new KGS(key, g, s));
 		else {

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Roy Gao on 1/13/2016.
  */
-public class WriteDataToRedis {
+public class RedisWriter {
 
 	private String host;
 	private int port;
@@ -22,7 +22,7 @@ public class WriteDataToRedis {
 //		writer.writeToRedis();
 	}
 
-	public WriteDataToRedis(String host, int port) {
+	public RedisWriter(String host, int port) {
 		this.host = host;
 		this.port = port;
 	}

@@ -7,9 +7,9 @@ import bolt.DBolt;
 import bolt.UBolt;
 import conf.Parameters;
 import spout.RedisQueueSpout;
-import util.RedisCleanUp;
+import util.RedisCleaner;
 import util.ReportManager;
-import util.WriteDataToRedis;
+import util.RedisWriter;
 
 import java.io.IOException;
 
@@ -59,8 +59,8 @@ public class MainDriver {
 	}
 
 	private static void setup(TopologyBuilder builder, ReportManager manager, String mode) throws IOException {
-		WriteDataToRedis.writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
-		RedisCleanUp.redisCleanUp(Parameters.LOCAL_HOST);
+		RedisWriter.writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
+		RedisCleaner.redisCleanUp(Parameters.LOCAL_HOST);
 
 		builder.setSpout(Parameters.SPOUT_NAME, new RedisQueueSpout(mode, Parameters.REDIS_PORT), 1);
 

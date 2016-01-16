@@ -28,6 +28,8 @@ public class Controller implements IRichBolt {
 
 	private Map<Integer, Integer> loadList;
 	private Map<Integer, NodeWithCursor> detailList;
+	private int loadReportRound;
+	private int detailReportRound;
 
 	public Controller(String host, int port) {
 		this.host = host;
@@ -38,10 +40,11 @@ public class Controller implements IRichBolt {
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		_collector = collector;
-		DBoltNumber = context.getComponentTasks(Parameters.CONTROLLER_NAME).size();
+		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
 
 		loadList = new HashMap<>();
 		detailList = new HashMap<>();
+		loadReportRound = detailReportRound = 0;
 	}
 
 	@Override
@@ -49,7 +52,7 @@ public class Controller implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 		String reportHead = tuple.getValue(0).toString();
 
-		if (reportHead.equals(Parameters.REDIS_LOAD_REPORT)) {
+		if (reportHead.equals(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound)) {
 			// receive summary report from DBolt
 			int boltNumber = (int) tuple.getValue(1);
 			int boltLoad = (int) tuple.getValue(2);
@@ -60,39 +63,44 @@ public class Controller implements IRichBolt {
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
 					sum += entry.getValue();
 
-				int average = sum / context.getComponentTasks(Parameters.CONTROLLER_NAME).size();
+				int average = sum / DBoltNumber;
 				boolean balanced = true;
 
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
 					if (entry.getValue() > average * Parameters.BALANCED_INDEX) {
 						balanced = false;
-						for (int i = 0; i < DBoltNumber; ++i)
-							jedis.lpush(Parameters.REDIS_DETAIL + i);
+
+						for (int i = 0; i < DBoltNumber; ++i) {
+							jedis.lpush(Parameters.REDIS_DETAIL + i, "");
+							jedis.lpush("imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
+						}
 						break;
 					}
 
 				if (balanced)
-//					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ balanced");
-					jedis.lpush("balanced", "");
-				else
-//					System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ NOT balanced");
-					jedis.lpush("imbalanced", "");
+					for (int i = 0; i < DBoltNumber; ++i)
+						jedis.lpush("balanced-" + loadReportRound, i + "-" + loadList.get(i));
 
 				loadList.clear();
+				loadReportRound++;
 			}
 
-		} else if (reportHead.equals(Parameters.REDIS_DETAIL_REPORT)) {
+		} else if (reportHead.equals(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound)) {
 			// receive detail report from DBolt
 			int boltNumber = (int) tuple.getValue(1);
-			NodeWithCursor node = new NodeWithCursor(boltNumber, tuple.getValue(3).toString());
+			String detailInfo = tuple.getValue(3).toString();
+
+			NodeWithCursor node = new NodeWithCursor(boltNumber, detailInfo);
 			detailList.put(boltNumber, node);
 
-			if (detailList.size() == context.getComponentTasks(Parameters.DBOLT_NAME).size()) {
+			if (detailList.size() == DBoltNumber) {
+				jedis.lpush(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 				ReBalance.reBalance(detailList);
 
 				// send massage to update routing table and adjust bolts
 
 				detailList.clear();
+				detailReportRound++;
 			}
 
 		}
