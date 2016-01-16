@@ -98,7 +98,7 @@ public class Controller implements IRichBolt {
 				Balancer.reBalance(detailList);
 
 				// send massage to update routing table and adjust bolts
-				jedis.lpush("rebalanced!-" + detailReportRound);
+				jedis.lpush("rebalanced-" + detailReportRound, "");
 
 				detailList.clear();
 				detailReportRound++;

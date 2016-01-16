@@ -2,6 +2,7 @@ package balancing;
 
 import balancing.io.*;
 import conf.Parameters;
+import redis.clients.jedis.Jedis;
 
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
 public class Balancer {
 
 	private static NodeWithCursor[] node;
-	private static NodeWithCursor[] backupNode;
+	private static NodeWithCursor[] copyOfNode;
 	private static historyS[] history;
 	private static int N;
 	private static int upperBound;
@@ -23,7 +24,17 @@ public class Balancer {
 	});
 	public static Map<Integer, Integer> routing;
 
+	private static transient Jedis jedis;
+
 	public static void reBalance(Map<Integer, NodeWithCursor> nodeList) {
+		Jedis jedis = getConnectedJedis();
+
+		if (history == null) {
+			history = new historyS[Parameters.KEY_NUMBER + 1];
+			for (int i = 0; i < Parameters.KEY_NUMBER + 1; ++i)
+				history[i] = new historyS(Parameters.WINDOW_SIZE);
+		}
+
 		N = nodeList.size();
 		node = new NodeWithCursor[N];
 		for (int i = 0; i < N; ++i)
@@ -39,6 +50,8 @@ public class Balancer {
 
 		updateRouting();
 
+		getCost();
+
 		// push new routing into redis
 	}
 
@@ -49,12 +62,13 @@ public class Balancer {
 		int average = total / N;
 
 		upperBound = (int) (average * Parameters.BALANCED_INDEX);
+		System.out.println(average + "\t" + upperBound);
 	}
 
 	private static void backup() {
-		backupNode = new NodeWithCursor[N];
+		copyOfNode = new NodeWithCursor[N];
 		for (int i = 0; i < N; ++i)
-			backupNode[i] = new NodeWithCursor(node[i]);
+			copyOfNode[i] = new NodeWithCursor(node[i]);
 	}
 
 	private static int getRoutingSize() {
@@ -71,6 +85,8 @@ public class Balancer {
 	private static void updateRouting() {
 		if (routing != null)
 			routing.clear();
+		else
+			routing = new HashMap<>();
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : node[i].infoList.values())
 				if (kgs.getKey() % N != i)
@@ -93,8 +109,8 @@ public class Balancer {
 			KGS kgs = migrationKGS.getInfo();
 			int keyid = kgs.getKey();
 
-			backupNode[keyid % N].add(kgs);
-			backupNode[cNid].remove(keyid);
+//			copyOfNode[keyid % N].add(kgs);
+//			copyOfNode[cNid].remove(keyid);
 
 			node[keyid % N].add(kgs);
 			node[cNid].remove(keyid);
@@ -223,5 +239,33 @@ public class Balancer {
 				System.out.println();
 			}
 		}
+	}
+
+	private static int getCost() {
+		int cost = 0;
+
+		for (int i = 0; i < N; ++i)
+			for (KGS kgs : node[i].infoList.values()) {
+				if (!copyOfNode[i].infoList.containsKey(kgs.getKey()))
+					cost += kgs.getS();
+				if (Parameters.WINDOW_SIZE != 1)
+					cost += history[kgs.getKey()].getHistorySum();
+				history[kgs.getKey()].add(kgs.getS());
+			}
+
+		return cost;
+	}
+
+	private static Jedis getConnectedJedis() {
+		if (jedis != null)
+			return jedis;
+
+		try {
+			jedis = new Jedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jedis;
 	}
 }

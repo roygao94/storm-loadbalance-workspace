@@ -1,8 +1,12 @@
 package test;
 
 import balancing.Balancer;
+import balancing.io.KGS;
 import balancing.io.NodeWithCursor;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,13 +15,24 @@ import java.util.Map;
  */
 public class NodeTest {
 
-	public static void main(String[] args) {
-		NodeWithCursor node = new NodeWithCursor(0, "1,1,1\t2,2,2\t3,3,3\t4,4,4\t5,5,5");
+	public static void main(String[] args) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader("equal-10000.txt"));
+		NodeWithCursor[] node = new NodeWithCursor[10];
+		for (int i = 0; i < 10; ++i)
+			node[i] = new NodeWithCursor();
+
+		String line;
+		for (int count = 0; (line = reader.readLine()) != null; ) {
+			count++;
+			int key = count;
+			int g = Integer.parseInt(line);
+			node[key % 10].add(new KGS(key, g, 1));
+		}
+
 		Map<Integer, NodeWithCursor> nodeList = new HashMap<>();
 		for (int i = 0; i < 10; ++i)
-			nodeList.put(i, new NodeWithCursor(node));
-		Balancer.reBalance(nodeList);
+			nodeList.put(i, node[i]);
 
-		System.out.println(node.infoList.size());
+		Balancer.reBalance(nodeList);
 	}
 }
