@@ -46,9 +46,9 @@ public class Balancer {
 		int total = 0;
 		for (int i = 0; i < N; ++i)
 			total += node[i].getTotalLoad();
-		int avg = total / N;
+		int average = total / N;
 
-		upperBound = (int) (avg * Parameters.BALANCED_INDEX);
+		upperBound = (int) (average * Parameters.BALANCED_INDEX);
 	}
 
 	private static void backup() {
@@ -69,7 +69,8 @@ public class Balancer {
 	}
 
 	private static void updateRouting() {
-		routing.clear();
+		if (routing != null)
+			routing.clear();
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : node[i].infoList.values())
 				if (kgs.getKey() % N != i)
@@ -101,12 +102,11 @@ public class Balancer {
 	}
 
 	private static void migrate() {
-		for (int i = 0; i < N; ++i) {
+		for (int i = 0; i < N; ++i)
 			if (node[i].getTotalLoad() > upperBound) {
 				Map<Integer, KGS> moveList = getMigrationOutGroup(i);
 				publicSet.addAll(moveList.values());
 			}
-		}
 
 		putPublicSetToLowNodes();
 	}

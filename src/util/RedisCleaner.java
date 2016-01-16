@@ -34,7 +34,7 @@ public class RedisCleaner {
 		for (String key : keys)
 			if (key.startsWith(Parameters.REDIS_LOAD) || key.startsWith(Parameters.REDIS_DETAIL)
 					|| key.startsWith(Parameters.REDIS_LOAD_REPORT) || key.startsWith(Parameters.REDIS_DETAIL_REPORT)
-					|| key.startsWith("balanced") || key.startsWith("imbalanced"))
+					|| key.startsWith("balanced") || key.startsWith("imbalanced") || key.startsWith("rebalanced"))
 				jedis.del(key);
 
 		jedis.disconnect();
