@@ -54,18 +54,18 @@ public class MainDriver {
 
 			if (args[1].equals("local")) {// local mode
 				parameters.HOST = Parameters.LOCAL_HOST;
-				parameters.REDIS_HEAD += "L";
+				parameters.REDIS_HEAD += "L-";
 			} else if (args[1].equals("remote")) {// remote mode
 				parameters.HOST = Parameters.REMOTE_HOST;
-				parameters.REDIS_HEAD += "R";
+				parameters.REDIS_HEAD += "R-";
 			} else errorArgs();
 
 			if (args[2].equals("ignore")) {
 				parameters.BALANCE = false;
-				parameters.REDIS_HEAD += "I";
+				parameters.REDIS_HEAD += "I-";
 			} else if (args[2].equals("balance")) {
 				parameters.BALANCE = true;
-				parameters.REDIS_HEAD += "B";
+				parameters.REDIS_HEAD += "B-";
 			}
 
 

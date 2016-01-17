@@ -101,14 +101,15 @@ public class Controller implements IRichBolt {
 
 				if (balance) {
 					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
-					String routingInfo = "";
-					for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
-						routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
+					if (newRouting.size() > 0) {
+						String routingInfo = "";
+						for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
+							routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
 
-					int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
-					for (int i = 0; i < UBoltNumber; ++i)
-						jedis.set(head + Parameters.REDIS_RT + i, routingInfo);
-
+						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
+						for (int i = 0; i < UBoltNumber; ++i)
+							jedis.set(head + Parameters.REDIS_RT + i, routingInfo);
+					}
 				}
 				// send massage to update routing table and adjust bolts
 //				jedis.lpush(head + "rebalanced-" + detailReportRound, "");

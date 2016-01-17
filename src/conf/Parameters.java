@@ -38,7 +38,7 @@ public class Parameters {
 	public static int WINDOW_SIZE = 5;
 	public static int POW_EXP = 3;
 
-	public static double BALANCED_INDEX = 1.1;
+	public static double BALANCED_INDEX = 1.2;
 
 	public Parameters() {
 		TOPOLOGY_NAME = DEFAULT_TOPOLOGY_NAME;

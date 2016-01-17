@@ -8,8 +8,7 @@ import backtype.storm.tuple.Fields;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Roy Gao on 1/9/2016.
@@ -25,8 +24,11 @@ public class RedisQueueSpout extends BaseRichSpout {
 	private static long count = 0;
 	private transient Jedis jedis = null;
 
+	private Queue<Integer> randomQueue;
+
 	public RedisQueueSpout(Parameters parameters) {
 		host = parameters.HOST;
+		randomQueue = new LinkedList<>();
 	}
 
 	@Override
@@ -45,17 +47,41 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-		Object text = null;
-		try {
-			text = jedis.lindex(Parameters.REDIS_KGS, count);
-			if (++count >= len)
-				count = 0;
-		} catch (Exception e) {
-			disconnect();
-		}
+//		Object text = getTextByOrder();
+		Object text = getRandomText();
 
 		if (text != null)
 			emitData(text);
+	}
+
+	private Object getTextByOrder() {
+		Object text = null;
+		text = jedis.lindex(Parameters.REDIS_KGS, count);
+		if (++count >= len)
+			count = 0;
+
+		return text;
+	}
+
+	private Object getRandomText() {
+		Object text = null;
+
+		if (randomQueue.isEmpty())
+			generateRandomNumbers();
+		text = jedis.lindex(Parameters.REDIS_KGS, randomQueue.poll());
+
+		return text;
+	}
+
+	private void generateRandomNumbers() {
+		Set<Integer> set = new HashSet<>();
+		int num;
+
+		while (set.size() < Parameters.KEY_NUMBER) {
+			num = (int) (Math.random() * Parameters.KEY_NUMBER);
+			set.add((int) (Math.random() * Parameters.KEY_NUMBER));
+			randomQueue.offer(num);
+		}
 	}
 
 	private Jedis getConnectedJedis() {
