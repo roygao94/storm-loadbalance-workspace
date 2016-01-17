@@ -25,14 +25,16 @@ public class UBolt implements IRichBolt {
 
 	private boolean balance;
 	private String host;
+	private String head;
 	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	Map<Integer, Integer> routingTable;
 
 	public UBolt(Parameters parameters) {
-		this.balance = parameters.BALANCE;
-		this.host = parameters.HOST;
+		balance = parameters.BALANCE;
+		host = parameters.HOST;
+		head = parameters.REDIS_HEAD;
 	}
 
 	@Override
@@ -48,21 +50,21 @@ public class UBolt implements IRichBolt {
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
 
-		if (balance) {
-			if (jedis.exists(Parameters.REDIS_RT + myNumber)) {
-				// update routing table
-				String routingInfo = jedis.get(Parameters.REDIS_RT + myNumber);
-				Map<Integer, Integer> newRouting = new HashMap<>();
-				String[] split = routingInfo.split("\t");
-				for (String routing : split) {
-					String[] item = routing.split(":");
-					newRouting.put(Integer.parseInt(item[0]), Integer.parseInt(item[1]));
-				}
-
-				routingTable = newRouting;
-				jedis.del(Parameters.REDIS_RT + myNumber);
+//		if (balance) {
+		if (jedis.exists(head + Parameters.REDIS_RT + myNumber)) {
+			// update routing table
+			String routingInfo = jedis.get(head + Parameters.REDIS_RT + myNumber);
+			Map<Integer, Integer> newRouting = new HashMap<>();
+			String[] split = routingInfo.split("\t");
+			for (String routing : split) {
+				String[] item = routing.split(":");
+				newRouting.put(Integer.parseInt(item[0]), Integer.parseInt(item[1]));
 			}
+
+			routingTable = newRouting;
+			jedis.del(head + Parameters.REDIS_RT + myNumber);
 		}
+//		}
 
 		String line = tuple.getString(0);
 		String[] split = line.split(",");

@@ -24,6 +24,7 @@ public class DBolt implements IRichBolt {
 
 	private boolean balance;
 	private String host;
+	private String head;
 	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
@@ -33,8 +34,9 @@ public class DBolt implements IRichBolt {
 	private int detailReportRound;
 
 	public DBolt(Parameters parameters) {
-		this.balance = parameters.BALANCE;
-		this.host = parameters.HOST;
+		balance = parameters.BALANCE;
+		host = parameters.HOST;
+		head = parameters.REDIS_HEAD;
 	}
 
 	@Override
@@ -50,25 +52,25 @@ public class DBolt implements IRichBolt {
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
 
-		if (balance) {
-			if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
-				// emit sum to Controller
-				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-						new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
-				// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
-				load = 0;
-				jedis.del(Parameters.REDIS_LOAD + myNumber);
+//		if (balance) {
+		if (jedis.exists(head + Parameters.REDIS_LOAD + myNumber)) {
+			// emit sum to Controller
+			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+					new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
+			// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
+			load = 0;
+			jedis.del(head + Parameters.REDIS_LOAD + myNumber);
 
-			} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
-				// emit detail to Controller
-				String detailInfo = getDetailInfo();
-				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-						new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
-				// infoList.clear();
-				jedis.del(Parameters.REDIS_DETAIL + myNumber);
+		} else if (jedis.exists(head + Parameters.REDIS_DETAIL + myNumber)) {
+			// emit detail to Controller
+			String detailInfo = getDetailInfo();
+			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+					new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
+			// infoList.clear();
+			jedis.del(head + Parameters.REDIS_DETAIL + myNumber);
 
-			}
 		}
+//		}
 		// record kgs info and put pressure
 		int key = (int) tuple.getValue(0);
 		int g = (int) tuple.getValue(1);
@@ -82,16 +84,16 @@ public class DBolt implements IRichBolt {
 
 	private String getDetailInfo() {
 		String detailInfo = "";
-		List<Map.Entry<Integer, KGS>> tempList = new ArrayList<>(infoList.entrySet());
+//		List<Map.Entry<Integer, KGS>> tempList = new ArrayList<>(infoList.entrySet());
+//
+//		Collections.sort(tempList, new Comparator<Map.Entry<Integer, KGS>>() {
+//			@Override
+//			public int compare(Map.Entry<Integer, KGS> o1, Map.Entry<Integer, KGS> o2) {
+//				return o1.getValue().compareTo(o2.getValue());
+//			}
+//		});
 
-		Collections.sort(tempList, new Comparator<Map.Entry<Integer, KGS>>() {
-			@Override
-			public int compare(Map.Entry<Integer, KGS> o1, Map.Entry<Integer, KGS> o2) {
-				return o1.getValue().compareTo(o2.getValue());
-			}
-		});
-
-		for (Map.Entry<Integer, KGS> entry : tempList)
+		for (Map.Entry<Integer, KGS> entry : infoList.entrySet())
 			detailInfo += entry.getValue().getKey() + ","
 					+ entry.getValue().getG() + ","
 					+ entry.getValue().getS() + "\t";

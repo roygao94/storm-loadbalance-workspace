@@ -9,6 +9,7 @@ import redis.clients.jedis.Jedis;
 public class ReportManager implements Runnable {
 
 	private String host;
+	private String head;
 	private int port = Parameters.REDIS_PORT;
 	int DBoltNumber;
 	long limit = -1;
@@ -19,7 +20,8 @@ public class ReportManager implements Runnable {
 //	}
 
 	public void initialize(Parameters parameters, int DBoltNumber) {
-		this.host = parameters.HOST;
+		host = parameters.HOST;
+		head = parameters.REDIS_HEAD;
 		this.DBoltNumber = DBoltNumber;
 	}
 
@@ -35,7 +37,7 @@ public class ReportManager implements Runnable {
 			for (int i = 0; i < 1000; ++i) ;
 			if (System.currentTimeMillis() - last > Parameters.REPORT_TIME) {
 				for (int i = 0; i < DBoltNumber; ++i)
-					jedis.lpush(Parameters.REDIS_LOAD + i, "");
+					jedis.lpush(head + Parameters.REDIS_LOAD + i, "");
 
 				if (limit > 0 && System.currentTimeMillis() - start > limit)
 					break;

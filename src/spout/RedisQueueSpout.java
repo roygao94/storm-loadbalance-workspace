@@ -26,7 +26,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	private transient Jedis jedis = null;
 
 	public RedisQueueSpout(Parameters parameters) {
-		this.host = parameters.HOST;
+		host = parameters.HOST;
 	}
 
 	@Override

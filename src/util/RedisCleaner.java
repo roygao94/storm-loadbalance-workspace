@@ -11,11 +11,12 @@ import java.util.Set;
 public class RedisCleaner {
 
 	public static void main(String[] args) {
-		redisCleanUp(Parameters.REMOTE_HOST);
+		redisCleanUp(new Parameters());
 	}
 
-	public static void redisCleanUp(String host) {
-		Jedis jedis = new Jedis(host, Parameters.REDIS_PORT);
+	public static void redisCleanUp(Parameters parameters) {
+		Jedis jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
+		String head = parameters.REDIS_HEAD;
 
 //		for (int i = 0; i < 10; ++i) {
 //			if (jedis.exists(Parameters.REDIS_LOAD + i))
@@ -32,10 +33,7 @@ public class RedisCleaner {
 
 		Set<String> keys = jedis.keys("*");
 		for (String key : keys)
-			if (key.startsWith(Parameters.REDIS_LOAD) || key.startsWith(Parameters.REDIS_DETAIL)
-					|| key.startsWith(Parameters.REDIS_LOAD_REPORT) || key.startsWith(Parameters.REDIS_DETAIL_REPORT)
-					|| key.startsWith(Parameters.REDIS_RT) || key.startsWith("debug")
-					|| key.startsWith("balanced") || key.startsWith("imbalanced") || key.startsWith("rebalanced"))
+			if (key.startsWith(head))
 				jedis.del(key);
 
 		jedis.disconnect();

@@ -22,7 +22,9 @@ public class Controller implements IRichBolt {
 	OutputCollector _collector;
 	int DBoltNumber;
 
+	private boolean balance;
 	private String host;
+	private String head;
 	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
@@ -32,7 +34,9 @@ public class Controller implements IRichBolt {
 	private int detailReportRound;
 
 	public Controller(Parameters parameters) {
-		this.host = parameters.HOST;
+		balance = parameters.BALANCE;
+		host = parameters.HOST;
+		head = parameters.REDIS_HEAD;
 	}
 
 	@Override
@@ -70,15 +74,15 @@ public class Controller implements IRichBolt {
 						balanced = false;
 
 						for (int i = 0; i < DBoltNumber; ++i) {
-							jedis.lpush(Parameters.REDIS_DETAIL + i, "");
-							// jedis.lpush("imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
+							jedis.lpush(head + Parameters.REDIS_DETAIL + i, "");
+//							jedis.lpush(head + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
 					}
 
-				if (balanced)
-					for (int i = 0; i < DBoltNumber; ++i)
-						// jedis.lpush("balanced-" + loadReportRound, i + "-" + loadList.get(i));
+//				if (balanced)
+//					for (int i = 0; i < DBoltNumber; ++i)
+//						jedis.lpush(head + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
 
 				loadList.clear();
 				loadReportRound++;
@@ -93,19 +97,21 @@ public class Controller implements IRichBolt {
 			detailList.put(boltNumber, node);
 
 			if (detailList.size() == DBoltNumber) {
-				// jedis.lpush(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
+//				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
-				Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
-				String routingInfo = "";
-				for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
-					routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
+				if (balance) {
+					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
+					String routingInfo = "";
+					for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
+						routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
 
-				int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
-				for (int i = 0; i < UBoltNumber; ++i)
-					jedis.set(Parameters.REDIS_RT + i, routingInfo);
+					int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
+					for (int i = 0; i < UBoltNumber; ++i)
+						jedis.set(head + Parameters.REDIS_RT + i, routingInfo);
 
+				}
 				// send massage to update routing table and adjust bolts
-				// jedis.lpush("rebalanced-" + detailReportRound, "");
+//				jedis.lpush(head + "rebalanced-" + detailReportRound, "");
 
 				detailList.clear();
 				detailReportRound++;

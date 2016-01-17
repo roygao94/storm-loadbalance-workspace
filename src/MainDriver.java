@@ -34,7 +34,7 @@ public class MainDriver {
 
 		if (args.length == 0) {
 			// default: local mode
-			setup(builder, manager, parameters);
+			setup(builder, parameters);
 
 			conf.setMaxTaskParallelism(3);
 
@@ -52,16 +52,21 @@ public class MainDriver {
 		} else if (args.length > 2) {
 			parameters.TOPOLOGY_NAME = args[0];
 
-			if (args[1].equals("local")) // local mode
+			if (args[1].equals("local")) {// local mode
 				parameters.HOST = Parameters.LOCAL_HOST;
-			else if (args[1].equals("remote")) // remote mode
+				parameters.REDIS_HEAD += "L";
+			} else if (args[1].equals("remote")) {// remote mode
 				parameters.HOST = Parameters.REMOTE_HOST;
-			else errorArgs();
+				parameters.REDIS_HEAD += "R";
+			} else errorArgs();
 
-			if (args[2].equals("ignore"))
+			if (args[2].equals("ignore")) {
 				parameters.BALANCE = false;
-			else if (args[2].equals("balance"))
+				parameters.REDIS_HEAD += "I";
+			} else if (args[2].equals("balance")) {
 				parameters.BALANCE = true;
+				parameters.REDIS_HEAD += "B";
+			}
 
 
 			startTopology(builder, manager, conf, parameters);
@@ -69,9 +74,9 @@ public class MainDriver {
 		} else errorArgs();
 	}
 
-	private static void setup(TopologyBuilder builder, ReportManager manager, Parameters parameters) throws IOException {
+	private static void setup(TopologyBuilder builder, Parameters parameters) throws IOException {
 		RedisWriter.writeToRedis(parameters.HOST, Parameters.REDIS_PORT);
-		RedisCleaner.redisCleanUp(parameters.HOST);
+		RedisCleaner.redisCleanUp(parameters);
 
 		builder.setSpout(Parameters.SPOUT_NAME, new RedisQueueSpout(parameters), 1);
 
@@ -80,21 +85,21 @@ public class MainDriver {
 		builder.setBolt(Parameters.DBOLT_NAME,
 				new DBolt(parameters), 10).directGrouping(Parameters.UBOLT_NAME);
 
-		if (parameters.BALANCE)
-			builder.setBolt(Parameters.CONTROLLER_NAME,
-					new Controller(parameters), 1).directGrouping(Parameters.DBOLT_NAME);
-
-//			manager.initialize(parameters, 10);
+//		if (parameters.BALANCE)
+		builder.setBolt(Parameters.CONTROLLER_NAME,
+				new Controller(parameters), 1).directGrouping(Parameters.DBOLT_NAME);
 	}
 
 	private static void startTopology(TopologyBuilder builder, ReportManager manager,
 	                                  Config conf, Parameters parameters) throws Exception {
-		setup(builder, manager, parameters);
+		setup(builder, parameters);
 
 		conf.setNumWorkers(10);
 		StormSubmitter.submitTopologyWithProgressBar(parameters.TOPOLOGY_NAME, conf, builder.createTopology());
 
 		if (parameters.BALANCE) {
+			manager.initialize(parameters, 10);
+
 			Thread thread = new Thread(manager);
 			// thread.setDaemon(true);
 			thread.start();
