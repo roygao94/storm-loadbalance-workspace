@@ -57,6 +57,7 @@ public class UBolt implements IRichBolt {
 			}
 
 			routingTable = newRouting;
+			jedis.del(Parameters.REDIS_RT + myNumber);
 		}
 
 		String line = tuple.getString(0);
