@@ -23,7 +23,7 @@ public class Controller implements IRichBolt {
 	int DBoltNumber;
 
 	private String host;
-	private int port;
+	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	private Map<Integer, Integer> loadList;
@@ -31,9 +31,8 @@ public class Controller implements IRichBolt {
 	private int loadReportRound;
 	private int detailReportRound;
 
-	public Controller(String host, int port) {
-		this.host = host;
-		this.port = port;
+	public Controller(Parameters parameters) {
+		this.host = parameters.HOST;
 	}
 
 	@Override
@@ -72,14 +71,14 @@ public class Controller implements IRichBolt {
 
 						for (int i = 0; i < DBoltNumber; ++i) {
 							jedis.lpush(Parameters.REDIS_DETAIL + i, "");
-							jedis.lpush("imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
+							// jedis.lpush("imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
 					}
 
 				if (balanced)
 					for (int i = 0; i < DBoltNumber; ++i)
-						jedis.lpush("balanced-" + loadReportRound, i + "-" + loadList.get(i));
+						// jedis.lpush("balanced-" + loadReportRound, i + "-" + loadList.get(i));
 
 				loadList.clear();
 				loadReportRound++;
@@ -94,7 +93,7 @@ public class Controller implements IRichBolt {
 			detailList.put(boltNumber, node);
 
 			if (detailList.size() == DBoltNumber) {
-				jedis.lpush(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
+				// jedis.lpush(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
 				Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
 				String routingInfo = "";
@@ -106,7 +105,7 @@ public class Controller implements IRichBolt {
 					jedis.set(Parameters.REDIS_RT + i, routingInfo);
 
 				// send massage to update routing table and adjust bolts
-				jedis.lpush("rebalanced-" + detailReportRound, "");
+				// jedis.lpush("rebalanced-" + detailReportRound, "");
 
 				detailList.clear();
 				detailReportRound++;
@@ -117,7 +116,6 @@ public class Controller implements IRichBolt {
 
 	@Override
 	public void cleanup() {
-
 	}
 
 	@Override

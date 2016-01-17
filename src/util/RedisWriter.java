@@ -15,16 +15,15 @@ import java.util.List;
 public class RedisWriter {
 
 	private String host;
-	private int port;
+	private int port = Parameters.REDIS_PORT;
 
 	public static void main(String[] args) throws IOException {
 		writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
 //		writer.writeToRedis();
 	}
 
-	public RedisWriter(String host, int port) {
-		this.host = host;
-		this.port = port;
+	public RedisWriter(Parameters parameters) {
+		this.host = parameters.HOST;
 	}
 
 	public static void writeToRedis(String host, int port) throws IOException {

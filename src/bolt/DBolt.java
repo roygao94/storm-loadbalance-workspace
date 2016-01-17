@@ -22,8 +22,9 @@ public class DBolt implements IRichBolt {
 	OutputCollector _collector;
 	int myNumber;
 
+	private boolean balance;
 	private String host;
-	private int port;
+	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	private Map<Integer, KGS> infoList = new HashMap<>();
@@ -31,9 +32,9 @@ public class DBolt implements IRichBolt {
 	private int loadReportRound;
 	private int detailReportRound;
 
-	public DBolt(String host, int port) {
-		this.host = host;
-		this.port = port;
+	public DBolt(Parameters parameters) {
+		this.balance = parameters.BALANCE;
+		this.host = parameters.HOST;
 	}
 
 	@Override
@@ -49,31 +50,32 @@ public class DBolt implements IRichBolt {
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
 
-		if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
-			// emit sum to Controller
-			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
-			// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
-			load = 0;
-			jedis.del(Parameters.REDIS_LOAD + myNumber);
+		if (balance) {
+			if (jedis.exists(Parameters.REDIS_LOAD + myNumber)) {
+				// emit sum to Controller
+				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+						new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
+				// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
+				load = 0;
+				jedis.del(Parameters.REDIS_LOAD + myNumber);
 
-		} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
-			// emit detail to Controller
-			String detailInfo = getDetailInfo();
-			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
-			// infoList.clear();
-			jedis.del(Parameters.REDIS_DETAIL + myNumber);
+			} else if (jedis.exists(Parameters.REDIS_DETAIL + myNumber)) {
+				// emit detail to Controller
+				String detailInfo = getDetailInfo();
+				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+						new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
+				// infoList.clear();
+				jedis.del(Parameters.REDIS_DETAIL + myNumber);
 
-		} else {
-			// record kgs info and put pressure
-			int key = (int) tuple.getValue(0);
-			int g = (int) tuple.getValue(1);
-
-			recordInfo(key, g, 1);
-			for (int i = 0; i < g; ++i)
-				calculatePi();
+			}
 		}
+		// record kgs info and put pressure
+		int key = (int) tuple.getValue(0);
+		int g = (int) tuple.getValue(1);
+
+		recordInfo(key, g, 1);
+		for (int i = 0; i < g; ++i)
+			calculatePi();
 
 		_collector.ack(tuple);
 	}

@@ -20,14 +20,13 @@ public class RedisQueueSpout extends BaseRichSpout {
 	protected SpoutOutputCollector _collector;
 
 	private String host;
-	private int port;
+	private int port = Parameters.REDIS_PORT;
 	private long len = 0;
 	private static long count = 0;
 	private transient Jedis jedis = null;
 
-	public RedisQueueSpout(String host, int port) {
-		this.host = host;
-		this.port = port;
+	public RedisQueueSpout(Parameters parameters) {
+		this.host = parameters.HOST;
 	}
 
 	@Override

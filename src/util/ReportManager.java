@@ -9,18 +9,17 @@ import redis.clients.jedis.Jedis;
 public class ReportManager implements Runnable {
 
 	private String host;
-	int port;
+	private int port = Parameters.REDIS_PORT;
 	int DBoltNumber;
 	long limit = -1;
 
-	public ReportManager() {
-		host = Parameters.REMOTE_HOST;
-		port = Parameters.REDIS_PORT;
-	}
+//	public ReportManager() {
+//		host = Parameters.REMOTE_HOST;
+//		port = Parameters.REDIS_PORT;
+//	}
 
-	public void initialize(String host, int port, int DBoltNumber) {
-		this.host = host;
-		this.port = port;
+	public void initialize(Parameters parameters, int DBoltNumber) {
+		this.host = parameters.HOST;
 		this.DBoltNumber = DBoltNumber;
 	}
 

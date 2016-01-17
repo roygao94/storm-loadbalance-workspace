@@ -24,6 +24,9 @@ public class Parameters {
 	public static final String DBOLT_NAME = "d-bolt";
 	public static final String CONTROLLER_NAME = "controller";
 
+	public String TOPOLOGY_NAME;
+	public boolean BALANCE = false;
+	public String HOST = LOCAL_HOST;
 
 	public static long REPORT_TIME = 10000;
 	public static final long LOCAL_TIME = 50000;
@@ -35,4 +38,10 @@ public class Parameters {
 	public static int POW_EXP = 3;
 
 	public static double BALANCED_INDEX = 1.2;
+
+	public Parameters() {
+		TOPOLOGY_NAME = DEFAULT_TOPOLOGY_NAME;
+		BALANCE = false;
+		HOST = LOCAL_HOST;
+	}
 }

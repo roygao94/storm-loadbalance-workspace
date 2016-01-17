@@ -13,14 +13,16 @@ import spout.RedisQueueSpout;
 public class SimpleTopology {
 
 	public static void main(String[] args) throws Exception {
+		Parameters parameters = new Parameters();
+
 		TopologyBuilder builder = new TopologyBuilder();
 
-		builder.setSpout("spout", new RedisQueueSpout(Parameters.REMOTE_HOST, Parameters.REDIS_PORT), 1);
+		builder.setSpout("spout", new RedisQueueSpout(parameters), 1);
 
 		builder.setBolt("u-bolt",
-				new UBolt(Parameters.REMOTE_HOST, Parameters.REDIS_PORT), 10).shuffleGrouping("spout");
+				new UBolt(parameters), 10).shuffleGrouping("spout");
 		builder.setBolt("d-bolt",
-				new DBolt(Parameters.REMOTE_HOST, Parameters.REDIS_PORT), 10).directGrouping("u-bolt");
+				new DBolt(parameters), 10).directGrouping("u-bolt");
 
 		Config conf = new Config();
 		conf.setDebug(true);

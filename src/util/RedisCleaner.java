@@ -14,8 +14,8 @@ public class RedisCleaner {
 		redisCleanUp(Parameters.REMOTE_HOST);
 	}
 
-	public static void redisCleanUp(String mode) {
-		Jedis jedis = new Jedis(mode, Parameters.REDIS_PORT);
+	public static void redisCleanUp(String host) {
+		Jedis jedis = new Jedis(host, Parameters.REDIS_PORT);
 
 //		for (int i = 0; i < 10; ++i) {
 //			if (jedis.exists(Parameters.REDIS_LOAD + i))
