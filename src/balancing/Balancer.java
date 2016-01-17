@@ -26,7 +26,7 @@ public class Balancer {
 
 	private static transient Jedis jedis;
 
-	public static void reBalance(Map<Integer, NodeWithCursor> nodeList) {
+	public static Map<Integer, Integer> reBalance(Map<Integer, NodeWithCursor> nodeList) {
 		Jedis jedis = getConnectedJedis();
 
 		if (history == null) {
@@ -51,6 +51,8 @@ public class Balancer {
 		updateRouting();
 
 		getCost();
+
+		return routing;
 
 		// push new routing into redis
 	}

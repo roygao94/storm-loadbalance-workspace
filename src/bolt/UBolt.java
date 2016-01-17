@@ -48,7 +48,15 @@ public class UBolt implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 		if (jedis.exists(Parameters.REDIS_RT + myNumber)) {
 			// update routing table
+			String routingInfo = jedis.get(Parameters.REDIS_RT + myNumber);
+			Map<Integer, Integer> newRouting = new HashMap<>();
+			String[] split = routingInfo.split("\t");
+			for (String routing : split) {
+				String[] item = routing.split(":");
+				newRouting.put(Integer.parseInt(item[0]), Integer.parseInt(item[1]));
+			}
 
+			routingTable = newRouting;
 		}
 
 		String line = tuple.getString(0);
