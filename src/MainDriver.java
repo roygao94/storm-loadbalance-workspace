@@ -97,13 +97,13 @@ public class MainDriver {
 		conf.setNumWorkers(10);
 		StormSubmitter.submitTopologyWithProgressBar(parameters.TOPOLOGY_NAME, conf, builder.createTopology());
 
-		if (parameters.BALANCE) {
-			manager.initialize(parameters, 10);
+//		if (parameters.BALANCE) {
+		manager.initialize(parameters, 10);
 
-			Thread thread = new Thread(manager);
-			// thread.setDaemon(true);
-			thread.start();
-		}
+		Thread thread = new Thread(manager);
+		// thread.setDaemon(true);
+		thread.start();
+//		}
 	}
 
 //	private static void setTopology(TopologyBuilder builder, ReportManager manager, String mode) {

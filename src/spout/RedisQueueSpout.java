@@ -47,8 +47,8 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-//		Object text = getTextByOrder();
-		Object text = getRandomText();
+		Object text = getTextByOrder();
+//		Object text = getRandomText();
 
 		if (text != null)
 			emitData(text);
