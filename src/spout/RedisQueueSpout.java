@@ -18,8 +18,9 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public static final String OUTPUT_FIELD = "text";
 	protected SpoutOutputCollector _collector;
 
-	private String host;
-	private int port = Parameters.REDIS_PORT;
+	private Parameters parameters;
+//	private String host;
+//	private int port = Parameters.REDIS_PORT;
 	private long len = 0;
 	private static long count = 0;
 	private transient Jedis jedis = null;
@@ -27,7 +28,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	private Queue<Integer> randomQueue;
 
 	public RedisQueueSpout(Parameters parameters) {
-		host = parameters.HOST;
+		this.parameters = new Parameters(parameters);
 		randomQueue = new LinkedList<>();
 	}
 
@@ -89,7 +90,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 			return jedis;
 
 		try {
-			jedis = new Jedis(host, port);
+			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
 			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
 			e.printStackTrace();

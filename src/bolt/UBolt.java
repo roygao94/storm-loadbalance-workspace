@@ -23,18 +23,17 @@ public class UBolt implements IRichBolt {
 	int myNumber;
 	int DBoltNumber;
 
-	private boolean balance;
-	private String host;
-	private String head;
-	private int port = Parameters.REDIS_PORT;
+	private Parameters parameters;
+//	private boolean balance;
+//	private String host;
+//	private String head;
+//	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	Map<Integer, Integer> routingTable;
 
 	public UBolt(Parameters parameters) {
-		balance = parameters.BALANCE;
-		host = parameters.HOST;
-		head = parameters.REDIS_HEAD;
+		this.parameters = new Parameters(parameters);
 	}
 
 	@Override
@@ -51,9 +50,9 @@ public class UBolt implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 
 //		if (balance) {
-		if (jedis.exists(head + Parameters.REDIS_RT + myNumber)) {
+		if (jedis.exists(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber)) {
 			// update routing table
-			String routingInfo = jedis.get(head + Parameters.REDIS_RT + myNumber);
+			String routingInfo = jedis.get(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber);
 			Map<Integer, Integer> newRouting = new HashMap<>();
 			String[] split = routingInfo.split("\t");
 			for (String routing : split) {
@@ -63,7 +62,7 @@ public class UBolt implements IRichBolt {
 
 			routingTable = newRouting;
 
-			jedis.del(head + Parameters.REDIS_RT + myNumber);
+			jedis.del(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber);
 		}
 //		}
 
@@ -97,7 +96,7 @@ public class UBolt implements IRichBolt {
 			return jedis;
 
 		try {
-			jedis = new Jedis(host, port);
+			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

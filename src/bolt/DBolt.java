@@ -22,10 +22,11 @@ public class DBolt implements IRichBolt {
 	OutputCollector _collector;
 	int myNumber;
 
-	private boolean balance;
-	private String host;
-	private String head;
-	private int port = Parameters.REDIS_PORT;
+	private Parameters parameters;
+//	private boolean balance;
+//	private String host;
+//	private String head;
+//	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	private Map<Integer, KGS> infoList = new HashMap<>();
@@ -34,9 +35,7 @@ public class DBolt implements IRichBolt {
 	private int detailReportRound;
 
 	public DBolt(Parameters parameters) {
-		balance = parameters.BALANCE;
-		host = parameters.HOST;
-		head = parameters.REDIS_HEAD;
+		this.parameters = new Parameters(parameters);
 	}
 
 	@Override
@@ -53,21 +52,21 @@ public class DBolt implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 
 //		if (balance) {
-		if (jedis.exists(head + Parameters.REDIS_LOAD + myNumber)) {
+		if (jedis.exists(parameters.REDIS_HEAD + Parameters.REDIS_LOAD + myNumber)) {
 			// emit sum to Controller
 			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
 					new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
 			// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
 			load = 0;
-			jedis.del(head + Parameters.REDIS_LOAD + myNumber);
+			jedis.del(parameters.REDIS_HEAD + Parameters.REDIS_LOAD + myNumber);
 
-		} else if (jedis.exists(head + Parameters.REDIS_DETAIL + myNumber)) {
+		} else if (jedis.exists(parameters.REDIS_HEAD + Parameters.REDIS_DETAIL + myNumber)) {
 			// emit detail to Controller
 			String detailInfo = getDetailInfo();
 			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
 					new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
 			// infoList.clear();
-			jedis.del(head + Parameters.REDIS_DETAIL + myNumber);
+			jedis.del(parameters.REDIS_HEAD + Parameters.REDIS_DETAIL + myNumber);
 
 		}
 //		}
@@ -137,7 +136,7 @@ public class DBolt implements IRichBolt {
 			return jedis;
 
 		try {
-			jedis = new Jedis(host, port);
+			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -22,10 +22,11 @@ public class Controller implements IRichBolt {
 	OutputCollector _collector;
 	int DBoltNumber;
 
-	private boolean balance;
-	private String host;
-	private String head;
-	private int port = Parameters.REDIS_PORT;
+	private Parameters parameters;
+//	private boolean balance;
+//	private String host;
+//	private String head;
+//	private int port = Parameters.REDIS_PORT;
 	private transient Jedis jedis;
 
 	private Map<Integer, Integer> loadList;
@@ -34,9 +35,7 @@ public class Controller implements IRichBolt {
 	private int detailReportRound;
 
 	public Controller(Parameters parameters) {
-		balance = parameters.BALANCE;
-		host = parameters.HOST;
-		head = parameters.REDIS_HEAD;
+		this.parameters = new Parameters(parameters);
 	}
 
 	@Override
@@ -74,7 +73,7 @@ public class Controller implements IRichBolt {
 						balanced = false;
 
 						for (int i = 0; i < DBoltNumber; ++i) {
-							jedis.lpush(head + Parameters.REDIS_DETAIL + i, "");
+							jedis.lpush(parameters.REDIS_HEAD + Parameters.REDIS_DETAIL + i, "");
 //							jedis.lpush(head + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
@@ -99,7 +98,7 @@ public class Controller implements IRichBolt {
 			if (detailList.size() == DBoltNumber) {
 //				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
-				if (balance) {
+				if (parameters.BALANCE) {
 					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
 					if (newRouting.size() > 0) {
 						String routingInfo = "";
@@ -108,7 +107,7 @@ public class Controller implements IRichBolt {
 
 						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 						for (int i = 0; i < UBoltNumber; ++i)
-							jedis.set(head + Parameters.REDIS_RT + i, routingInfo);
+							jedis.set(parameters.REDIS_HEAD + Parameters.REDIS_RT + i, routingInfo);
 					}
 				}
 				// send massage to update routing table and adjust bolts
@@ -140,7 +139,7 @@ public class Controller implements IRichBolt {
 			return jedis;
 
 		try {
-			jedis = new Jedis(host, port);
+			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

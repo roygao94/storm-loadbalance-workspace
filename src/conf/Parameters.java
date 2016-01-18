@@ -1,9 +1,11 @@
 package conf;
 
+import java.io.Serializable;
+
 /**
  * Created by roy on 1/12/16.
  */
-public class Parameters {
+public class Parameters implements Serializable {
 
 	public static final String REMOTE_HOST = "10.11.1.56";
 	public static final String LOCAL_HOST = "localhost";
@@ -38,12 +40,19 @@ public class Parameters {
 	public static int WINDOW_SIZE = 5;
 	public static int POW_EXP = 3;
 
-	public static double BALANCED_INDEX = 1.15;
+	public static double BALANCED_INDEX = 1.2;
 
 	public Parameters() {
 		TOPOLOGY_NAME = DEFAULT_TOPOLOGY_NAME;
 		BALANCE = false;
 		HOST = REMOTE_HOST;
 		REDIS_HEAD = "TOPO-";
+	}
+
+	public Parameters(Parameters parameters) {
+		TOPOLOGY_NAME = parameters.TOPOLOGY_NAME;
+		BALANCE = parameters.BALANCE;
+		HOST = parameters.HOST;
+		REDIS_HEAD = parameters.REDIS_HEAD;
 	}
 }
