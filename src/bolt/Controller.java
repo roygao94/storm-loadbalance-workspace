@@ -99,6 +99,7 @@ public class Controller implements IRichBolt {
 //				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
 				if (parameters.BALANCE) {
+					long start = System.currentTimeMillis();
 					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
 					if (newRouting.size() > 0) {
 						String routingInfo = "";
@@ -108,10 +109,12 @@ public class Controller implements IRichBolt {
 						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 						for (int i = 0; i < UBoltNumber; ++i)
 							jedis.set(parameters.REDIS_HEAD + Parameters.REDIS_RT + i, routingInfo);
+
+						long timeElapsed = System.currentTimeMillis() - start;
+						jedis.lpush(parameters.REDIS_HEAD + "rebalanced-" + detailReportRound + "--" + timeElapsed, "");
 					}
 				}
 				// send massage to update routing table and adjust bolts
-				jedis.lpush(parameters.REDIS_HEAD + "rebalanced-" + detailReportRound, "");
 
 				detailList.clear();
 				detailReportRound++;
