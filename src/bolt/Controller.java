@@ -69,7 +69,7 @@ public class Controller implements IRichBolt {
 				boolean balanced = true;
 
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
-					if (entry.getValue() > average * Parameters.BALANCED_INDEX) {
+					if (entry.getValue() > average * (1 + Parameters.BALANCED_INDEX)) {
 						balanced = false;
 
 						for (int i = 0; i < DBoltNumber; ++i) {
@@ -111,7 +111,7 @@ public class Controller implements IRichBolt {
 					}
 				}
 				// send massage to update routing table and adjust bolts
-//				jedis.lpush(head + "rebalanced-" + detailReportRound, "");
+				jedis.lpush(parameters.REDIS_HEAD + "rebalanced-" + detailReportRound, "");
 
 				detailList.clear();
 				detailReportRound++;

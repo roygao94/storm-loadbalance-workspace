@@ -18,9 +18,11 @@ import java.io.IOException;
  */
 public class MainDriver {
 
-	// strom jar MainDriver.jar MainDriver
-	// [task-name] load-balance  [local|remote] remote  [ignore|balance] ignore...
-	// default: local mode
+	/*
+	strom jar MainDriver.jar MainDriver
+	[task-name] load-balance  [local|remote] remote  [ignore|balance] ignore...
+	default: local mode
+	*/
 
 	public static void main(String[] args) throws Exception {
 

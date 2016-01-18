@@ -40,7 +40,8 @@ public class Parameters implements Serializable {
 	public static int WINDOW_SIZE = 5;
 	public static int POW_EXP = 3;
 
-	public static double BALANCED_INDEX = 1.2;
+	public static double BALANCED_INDEX = 0.1;
+	public static boolean ENSURE_LOW = true;
 
 	public Parameters() {
 		TOPOLOGY_NAME = DEFAULT_TOPOLOGY_NAME;

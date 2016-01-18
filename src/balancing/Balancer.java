@@ -16,6 +16,7 @@ public class Balancer {
 	private static historyS[] history;
 	private static int N;
 	private static int upperBound;
+	private static int lowerBound;
 	private static PriorityQueue<KGS> publicSet = new PriorityQueue<>(Parameters.KEY_NUMBER, new Comparator<KGS>() {
 		@Override
 		public int compare(KGS o1, KGS o2) {
@@ -63,7 +64,8 @@ public class Balancer {
 			total += node[i].getTotalLoad();
 		int average = total / N;
 
-		upperBound = (int) (average * Parameters.BALANCED_INDEX);
+		upperBound = (int) (average * (1 + Parameters.BALANCED_INDEX));
+		lowerBound = (int) (average * (1 - Parameters.BALANCED_INDEX));
 		System.out.println(average + "\t" + upperBound);
 	}
 
@@ -154,7 +156,7 @@ public class Balancer {
 			}
 		});
 
-		PriorityQueue<KGS> publicSet2 = new PriorityQueue<>(Parameters.KEY_NUMBER, new Comparator<KGS>() {
+		Queue<KGS> publicSet2 = new PriorityQueue<>(Parameters.KEY_NUMBER, new Comparator<KGS>() {
 			@Override
 			public int compare(KGS o1, KGS o2) {
 				return -((Integer) o1.getG()).compareTo(o2.getG());
@@ -164,11 +166,31 @@ public class Balancer {
 		int minGoal = node[i].getTotalLoad() - upperBound;
 		int sumG = 0;
 
-		for (int j = 0; sumG < minGoal && j < thisNode.size(); ++j)
-			if (thisNode.get(j).getG() < cursor) {
-				publicSet2.add(new KGS(thisNode.get(j)));
-				sumG += thisNode.get(j).getG();
+		if (Parameters.ENSURE_LOW) {
+			int maxGoal = node[i].getTotalLoad() - lowerBound;
+			boolean flag = true;
+			int mark = 0;
+
+			for (int j = 0; sumG < minGoal && j < thisNode.size(); ++j)
+				if (thisNode.get(j).getG() < cursor && sumG + thisNode.get(j).getG() <= maxGoal) {
+					publicSet2.add(new KGS(thisNode.get(j)));
+					sumG += thisNode.get(j).getG();
+				} else if (flag && thisNode.get(j).getG() < cursor && sumG + thisNode.get(j).getG() > maxGoal) {
+					flag = false;
+					mark = j;
+				}
+
+			if (sumG < minGoal && !flag) {
+				publicSet2.add(new KGS(thisNode.get(mark)));
+				sumG += thisNode.get(mark).getG();
 			}
+
+		} else
+			for (int j = 0; sumG < minGoal && j < thisNode.size(); ++j)
+				if (thisNode.get(j).getG() < cursor) {
+					publicSet2.add(new KGS(thisNode.get(j)));
+					sumG += thisNode.get(j).getG();
+				}
 
 		if (sumG >= minGoal) {
 			Map<Integer, KGS> moveList = new HashMap<>();
