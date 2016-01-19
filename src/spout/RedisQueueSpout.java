@@ -53,7 +53,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-		if (lastWrite == 0 || lastWrite - System.currentTimeMillis() > Parameters.REPORT_TIME) {
+		if (lastWrite == 0 || System.currentTimeMillis() - lastWrite > Parameters.REPORT_TIME * 10) {
 			try {
 				List<String> keys = jedis.lrange(Parameters.REDIS_KGS, 0, len);
 
