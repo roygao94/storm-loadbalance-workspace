@@ -38,7 +38,7 @@ public class MainDriver {
 
 		if (args.length == 0) {
 			// default: local mode
-			File tempDir = new File("/home/roy/roy/temp/" + parameters.getTopologyName());
+			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 			if (!tempDir.exists())
 				tempDir.mkdirs();
 
@@ -61,10 +61,10 @@ public class MainDriver {
 			parameters.setTopologyName(args[0]);
 
 			if (args[1].equals("local")) {// local mode
-				parameters.setHost(Parameters.LOCAL_HOST);
+				parameters.setLocalMode();
 				parameters.appendRedisHead("L-");
 			} else if (args[1].equals("remote")) {// remote mode
-				parameters.setHost(Parameters.REMOTE_HOST);
+				parameters.setRemoteMode();
 				parameters.appendRedisHead("R-");
 			} else errorArgs();
 
@@ -93,7 +93,7 @@ public class MainDriver {
 			}
 
 
-			File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 			if (!tempDir.exists())
 				tempDir.mkdirs();
 

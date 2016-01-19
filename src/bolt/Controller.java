@@ -26,7 +26,7 @@ public class Controller implements IRichBolt {
 	int DBoltNumber;
 
 	private Parameters parameters;
-//	private boolean balance;
+	//	private boolean balance;
 //	private String host;
 //	private String head;
 //	private int port = Parameters.REDIS_PORT;
@@ -118,7 +118,7 @@ public class Controller implements IRichBolt {
 								"");
 
 						try {
-							File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+							File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 							if (!tempDir.exists())
 								tempDir.mkdirs();
 
@@ -127,9 +127,12 @@ public class Controller implements IRichBolt {
 							writer.write(timeElapsed + "ms" + " ," + newRouting.size());
 							writer.close();
 
-							Runtime runtime = Runtime.getRuntime();
-							runtime.exec("scp /home/admin/roy/temp/" + parameters.getTopologyName()
-									+ "/rebalance.txt admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+							if (parameters.isRemoteMode()) {
+								Runtime runtime = Runtime.getRuntime();
+								runtime.exec("scp" + " "
+										+ parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"
+										+ " " + "admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+							}
 
 						} catch (Exception e) {
 						}

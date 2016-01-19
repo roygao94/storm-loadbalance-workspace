@@ -57,7 +57,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 			try {
 				List<String> keys = jedis.lrange(Parameters.REDIS_KGS, 0, len);
 
-				File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+				File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 				if (!tempDir.exists())
 					tempDir.mkdirs();
 
@@ -66,9 +66,12 @@ public class RedisQueueSpout extends BaseRichSpout {
 					writer.write(keys.get(i));
 				writer.close();
 
-				Runtime runtime = Runtime.getRuntime();
-				runtime.exec("scp /home/admin/roy/temp/" + parameters.getTopologyName()
-						+ "/keys.txt admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+				if (parameters.isRemoteMode()) {
+					Runtime runtime = Runtime.getRuntime();
+					runtime.exec("scp" + " "
+							+ parameters.getBaseDir() + parameters.getTopologyName() + "/keys.txt"
+							+ " " + "admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+				}
 
 			} catch (Exception e) {
 			}

@@ -7,10 +7,15 @@ import java.io.Serializable;
  */
 public class Parameters implements Serializable {
 
+	enum Mode {LOCAL, REMOTE;}
+
 	public static final String REMOTE_HOST = "blade56";
 	public static final String LOCAL_HOST = "localhost";
 	public static final String REDIS_VM = "192.168.56.143";
 	public static final int REDIS_PORT = 6379;
+
+	public static final String LOCAL_BASE_DIR = "/home/roy/roy/temp";
+	public static final String REMOTE_BASE_DIR = "/home/admin/roy/temp";
 
 	public static final String REDIS_RT = "rt";
 	public static final String REDIS_KGS = "kgs";
@@ -38,26 +43,46 @@ public class Parameters implements Serializable {
 	public static double DEFAULT_BALANCED_INDEX = 0.1;
 	public static boolean ENSURE_LOW = true;
 
+
+	private Mode mode;
 	private String topologyName;
 	private boolean balance;
 	private String host;
 	private String redisHead;
 	private double balanceIndex;
+	private String baseDir;
+
 
 	public Parameters() {
+		mode = Mode.LOCAL;
 		topologyName = DEFAULT_TOPOLOGY_NAME;
 		balance = false;
 		host = LOCAL_HOST;
 		redisHead = "TOPO-";
 		balanceIndex = DEFAULT_BALANCED_INDEX;
+		baseDir = LOCAL_BASE_DIR;
 	}
 
 	public Parameters(Parameters parameters) {
+		mode = parameters.mode;
 		topologyName = parameters.topologyName;
 		balance = parameters.balance;
 		host = parameters.host;
 		redisHead = parameters.redisHead;
 		balanceIndex = parameters.balanceIndex;
+		baseDir = parameters.baseDir;
+	}
+
+	public void setLocalMode() {
+		mode = Mode.LOCAL;
+		setHost(LOCAL_HOST);
+		setBaseDir(LOCAL_BASE_DIR);
+	}
+
+	public void setRemoteMode() {
+		mode = Mode.REMOTE;
+		setHost(REMOTE_HOST);
+		setBaseDir(REMOTE_BASE_DIR);
 	}
 
 	public void setHost(String host) {
@@ -80,6 +105,18 @@ public class Parameters implements Serializable {
 		this.balanceIndex = balanceIndex;
 	}
 
+	public void setBaseDir(String baseDir) {
+		this.baseDir = baseDir;
+	}
+
+	public boolean isLocalMode() {
+		return mode == Mode.LOCAL;
+	}
+
+	public boolean isRemoteMode() {
+		return mode == Mode.REMOTE;
+	}
+
 	public String getTopologyName() {
 		return topologyName;
 	}
@@ -98,5 +135,9 @@ public class Parameters implements Serializable {
 
 	public double getBalanceIndex() {
 		return balanceIndex;
+	}
+
+	public String getBaseDir() {
+		return baseDir;
 	}
 }
