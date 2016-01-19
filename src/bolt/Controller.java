@@ -69,11 +69,11 @@ public class Controller implements IRichBolt {
 				boolean balanced = true;
 
 				for (Map.Entry<Integer, Integer> entry : loadList.entrySet())
-					if (entry.getValue() > average * (1 + Parameters.BALANCED_INDEX)) {
+					if (entry.getValue() > average * (1 + parameters.getBalanceIndex())) {
 						balanced = false;
 
 						for (int i = 0; i < DBoltNumber; ++i) {
-							jedis.lpush(parameters.REDIS_HEAD + Parameters.REDIS_DETAIL + i, "");
+							jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_DETAIL + i, "");
 //							jedis.lpush(head + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
@@ -98,9 +98,9 @@ public class Controller implements IRichBolt {
 			if (detailList.size() == DBoltNumber) {
 //				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
-				if (parameters.BALANCE) {
+				if (parameters.getBalance()) {
 					long start = System.currentTimeMillis();
-					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList);
+					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList, parameters.getBalanceIndex());
 					if (newRouting.size() > 0) {
 						String routingInfo = "";
 						for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
@@ -108,10 +108,10 @@ public class Controller implements IRichBolt {
 
 						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 						for (int i = 0; i < UBoltNumber; ++i)
-							jedis.set(parameters.REDIS_HEAD + Parameters.REDIS_RT + i, routingInfo);
+							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
 
 						long timeElapsed = System.currentTimeMillis() - start;
-						jedis.lpush(parameters.REDIS_HEAD + "rebalanced-" + detailReportRound + "--" + timeElapsed, "");
+						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound + "--" + timeElapsed, "");
 					}
 				}
 				// send massage to update routing table and adjust bolts
@@ -142,7 +142,7 @@ public class Controller implements IRichBolt {
 			return jedis;
 
 		try {
-			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
+			jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

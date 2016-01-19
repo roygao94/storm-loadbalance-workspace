@@ -27,7 +27,7 @@ public class Balancer {
 
 	private static transient Jedis jedis;
 
-	public static Map<Integer, Integer> reBalance(Map<Integer, NodeWithCursor> nodeList) {
+	public static Map<Integer, Integer> reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
 		Jedis jedis = getConnectedJedis();
 
 		if (history == null) {
@@ -41,7 +41,7 @@ public class Balancer {
 		for (int i = 0; i < N; ++i)
 			node[i] = nodeList.get(i);
 
-		computeBound();
+		computeBound(balanceIndex);
 		backup();
 
 //		int routingSize = getRoutingSize();
@@ -58,14 +58,14 @@ public class Balancer {
 		// push new routing into redis
 	}
 
-	private static void computeBound() {
+	private static void computeBound(double balanceIndex) {
 		int total = 0;
 		for (int i = 0; i < N; ++i)
 			total += node[i].getTotalLoad();
 		int average = total / N;
 
-		upperBound = (int) (average * (1 + Parameters.BALANCED_INDEX));
-		lowerBound = (int) (average * (1 - Parameters.BALANCED_INDEX));
+		upperBound = (int) (average * (1 + balanceIndex));
+		lowerBound = (int) (average * (1 - balanceIndex));
 		System.out.println(average + "\t" + upperBound);
 	}
 

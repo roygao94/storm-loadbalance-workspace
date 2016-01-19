@@ -38,8 +38,8 @@ public class RedisQueueSpout extends BaseRichSpout {
 	}
 
 	@Override
-	public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-		_collector = spoutOutputCollector;
+	public void open(Map map, TopologyContext context, SpoutOutputCollector collector) {
+		_collector = collector;
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 			return jedis;
 
 		try {
-			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
+			jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
 			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
 			e.printStackTrace();

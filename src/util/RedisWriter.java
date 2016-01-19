@@ -23,7 +23,7 @@ public class RedisWriter {
 	}
 
 	public RedisWriter(Parameters parameters) {
-		this.host = parameters.HOST;
+		this.host = parameters.getHost();
 	}
 
 	public static void writeToRedis(String host, int port) throws IOException {

@@ -12,6 +12,7 @@ import util.ReportManager;
 import util.RedisWriter;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * Created by Roy Gao on 1/13/2016.
@@ -52,22 +53,38 @@ public class MainDriver {
 			cluster.shutdown();
 
 		} else if (args.length > 2) {
-			parameters.TOPOLOGY_NAME = args[0];
+			parameters.setTopologyName(args[0]);
 
 			if (args[1].equals("local")) {// local mode
-				parameters.HOST = Parameters.LOCAL_HOST;
-				parameters.REDIS_HEAD += "L-";
+				parameters.setHost(Parameters.LOCAL_HOST);
+				parameters.appendRedisHead("L-");
 			} else if (args[1].equals("remote")) {// remote mode
-				parameters.HOST = Parameters.REMOTE_HOST;
-				parameters.REDIS_HEAD += "R-";
+				parameters.setHost(Parameters.REMOTE_HOST);
+				parameters.appendRedisHead("R-");
 			} else errorArgs();
 
 			if (args[2].equals("ignore")) {
-				parameters.BALANCE = false;
-				parameters.REDIS_HEAD += "I-";
+				parameters.setBalance(false);
+				parameters.appendRedisHead("I-");
 			} else if (args[2].equals("balance")) {
-				parameters.BALANCE = true;
-				parameters.REDIS_HEAD += "B-";
+				parameters.setBalance(true);
+				parameters.appendRedisHead("B-");
+			}
+
+			if (args[2].equals("balance")) {
+				if (args.length > 3)
+					try {
+						double balanceIndex = Double.parseDouble(args[3]);
+						if (balanceIndex > 0 || balanceIndex < 1)
+							parameters.setBalanceIndex(balanceIndex);
+						else {
+							errorArgs();
+							return;
+						}
+					} catch (Exception e) {
+						errorArgs();
+						return;
+					}
 			}
 
 
@@ -77,7 +94,7 @@ public class MainDriver {
 	}
 
 	private static void setup(TopologyBuilder builder, Parameters parameters) throws IOException {
-		RedisWriter.writeToRedis(parameters.HOST, Parameters.REDIS_PORT);
+		RedisWriter.writeToRedis(parameters.getHost(), Parameters.REDIS_PORT);
 		RedisCleaner.redisCleanUp(parameters);
 
 		builder.setSpout(Parameters.SPOUT_NAME, new RedisQueueSpout(parameters), 1);
@@ -97,7 +114,7 @@ public class MainDriver {
 		setup(builder, parameters);
 
 		conf.setNumWorkers(10);
-		StormSubmitter.submitTopologyWithProgressBar(parameters.TOPOLOGY_NAME, conf, builder.createTopology());
+		StormSubmitter.submitTopologyWithProgressBar(parameters.getTopologyName(), conf, builder.createTopology());
 
 //		if (parameters.BALANCE) {
 		manager.initialize(parameters, 10);
@@ -122,6 +139,7 @@ public class MainDriver {
 //	}
 
 	private static void errorArgs() {
-		System.out.println("Usage: storm jar MainDriver.jar MainDriver [task-name] [local|remote] [ignore|balance]...");
+		System.out.println("Usage: storm jar MainDriver.jar "
+				+ "MainDriver [task-name] [local|remote] [ignore|balance] [balance-index] ...");
 	}
 }

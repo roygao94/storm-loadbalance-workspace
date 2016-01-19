@@ -33,6 +33,6 @@ public class NodeTest {
 		for (int i = 0; i < 10; ++i)
 			nodeList.put(i, node[i]);
 
-		Balancer.reBalance(nodeList);
+		Balancer.reBalance(nodeList, 0.1);
 	}
 }

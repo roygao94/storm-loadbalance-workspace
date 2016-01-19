@@ -15,8 +15,8 @@ public class RedisCleaner {
 	}
 
 	public static void redisCleanUp(Parameters parameters) {
-		Jedis jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
-		String head = parameters.REDIS_HEAD;
+		Jedis jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
+		String head = parameters.getRedisHead();
 
 //		for (int i = 0; i < 10; ++i) {
 //			if (jedis.exists(Parameters.REDIS_LOAD + i))

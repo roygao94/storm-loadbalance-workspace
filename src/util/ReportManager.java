@@ -31,13 +31,13 @@ public class ReportManager implements Runnable {
 
 	@Override
 	public void run() {
-		Jedis jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
+		Jedis jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
 		long start = System.currentTimeMillis(), last = start;
 		while (true) {
 			for (int i = 0; i < 1000; ++i) ;
 			if (System.currentTimeMillis() - last > Parameters.REPORT_TIME) {
 				for (int i = 0; i < DBoltNumber; ++i)
-					jedis.lpush(parameters.REDIS_HEAD + Parameters.REDIS_LOAD + i, "");
+					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
 
 				if (limit > 0 && System.currentTimeMillis() - start > limit)
 					break;

@@ -50,9 +50,9 @@ public class UBolt implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 
 //		if (balance) {
-		if (jedis.exists(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber)) {
+		if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_RT + myNumber)) {
 			// update routing table
-			String routingInfo = jedis.get(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber);
+			String routingInfo = jedis.get(parameters.getRedisHead() + Parameters.REDIS_RT + myNumber);
 			Map<Integer, Integer> newRouting = new HashMap<>();
 			String[] split = routingInfo.split("\t");
 			for (String routing : split) {
@@ -62,7 +62,7 @@ public class UBolt implements IRichBolt {
 
 			routingTable = newRouting;
 
-			jedis.del(parameters.REDIS_HEAD + Parameters.REDIS_RT + myNumber);
+			jedis.del(parameters.getRedisHead() + Parameters.REDIS_RT + myNumber);
 		}
 //		}
 
@@ -96,7 +96,7 @@ public class UBolt implements IRichBolt {
 			return jedis;
 
 		try {
-			jedis = new Jedis(parameters.HOST, Parameters.REDIS_PORT);
+			jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
