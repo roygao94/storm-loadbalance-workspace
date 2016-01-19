@@ -63,8 +63,8 @@ public class RedisQueueSpout extends BaseRichSpout {
 					tempDir.mkdirs();
 
 				BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
-				for (String key : keys)
-					writer.write(key);
+				for (int i = 0; i < len; i += 100)
+					writer.write(keys.get(i));
 				writer.close();
 
 				Runtime runtime = Runtime.getRuntime();
@@ -72,7 +72,6 @@ public class RedisQueueSpout extends BaseRichSpout {
 						+ "/keys.txt admin@blade56:~/roy/temp/" + parameters.getTopologyName());
 
 			} catch (Exception e) {
-				jedis.set("fail", "");
 			}
 
 			lastWrite = System.currentTimeMillis();
