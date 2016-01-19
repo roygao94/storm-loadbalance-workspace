@@ -10,7 +10,11 @@ import balancing.io.NodeWithCursor;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -111,7 +115,25 @@ public class Controller implements IRichBolt {
 							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
 
 						long timeElapsed = System.currentTimeMillis() - start;
-						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound + "--" + timeElapsed, "");
+						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound + "--" + timeElapsed,
+								"");
+
+						try {
+							File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+							if (!tempDir.exists())
+								tempDir.mkdirs();
+
+							BufferedWriter writer = new BufferedWriter(new FileWriter(
+									tempDir.getAbsolutePath() + "/rebalance.txt"));
+							writer.write(timeElapsed + "ms" + " ," + newRouting.size());
+							writer.close();
+
+							Runtime runtime = Runtime.getRuntime();
+							runtime.exec("scp /home/admin/roy/temp/" + parameters.getTopologyName()
+									+ "/rebalance.txt admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+
+						} catch (Exception e) {
+						}
 					}
 				}
 				// send massage to update routing table and adjust bolts
