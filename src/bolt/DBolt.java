@@ -7,7 +7,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import balancing.io.KGS;
+import balancing.utils.KGS;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 

@@ -6,7 +6,7 @@ import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import balancing.Balancer;
-import balancing.io.NodeWithCursor;
+import balancing.utils.NodeWithCursor;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
@@ -14,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

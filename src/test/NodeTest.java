@@ -1,8 +1,8 @@
 package test;
 
 import balancing.Balancer;
-import balancing.io.KGS;
-import balancing.io.NodeWithCursor;
+import balancing.utils.KGS;
+import balancing.utils.NodeWithCursor;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

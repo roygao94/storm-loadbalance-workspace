@@ -1,4 +1,4 @@
-package util;
+package tools;
 
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
