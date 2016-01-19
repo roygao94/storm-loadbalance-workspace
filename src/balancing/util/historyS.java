@@ -1,4 +1,4 @@
-package balancing.utils;
+package balancing.util;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

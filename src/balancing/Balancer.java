@@ -1,6 +1,6 @@
 package balancing;
 
-import balancing.utils.*;
+import balancing.util.*;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 

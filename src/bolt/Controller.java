@@ -6,7 +6,7 @@ import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import balancing.Balancer;
-import balancing.utils.NodeWithCursor;
+import balancing.util.NodeWithCursor;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 

@@ -1,4 +1,4 @@
-package balancing.utils;
+package balancing.util;
 
 /**
  * Created by Roy Gao on 11/25/2015.
