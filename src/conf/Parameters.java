@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class Parameters implements Serializable {
 
-	public static final String REMOTE_HOST = "10.11.1.56";
+	public static final String REMOTE_HOST = "blade56";
 	public static final String LOCAL_HOST = "localhost";
 	public static final String REDIS_VM = "192.168.56.143";
 	public static final int REDIS_PORT = 6379;
@@ -28,7 +28,7 @@ public class Parameters implements Serializable {
 
 	public static long REPORT_TIME = 10000;
 
-	public static final long LOCAL_TIME = 50000;
+	public static final long LOCAL_TIME = 5000;
 	public static final int KEY_NUMBER = 10000;
 
 	public static int DBOLT_NUMBER = 10;
@@ -47,7 +47,7 @@ public class Parameters implements Serializable {
 	public Parameters() {
 		topologyName = DEFAULT_TOPOLOGY_NAME;
 		balance = false;
-		host = REMOTE_HOST;
+		host = LOCAL_HOST;
 		redisHead = "TOPO-";
 		balanceIndex = DEFAULT_BALANCED_INDEX;
 	}

@@ -8,6 +8,9 @@ import backtype.storm.tuple.Fields;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.*;
 
 /**
@@ -19,10 +22,11 @@ public class RedisQueueSpout extends BaseRichSpout {
 	protected SpoutOutputCollector _collector;
 
 	private Parameters parameters;
-//	private String host;
+	//	private String host;
 //	private int port = Parameters.REDIS_PORT;
 	private long len = 0;
 	private static long count = 0;
+	private long lastWrite = 0;
 	private transient Jedis jedis = null;
 
 	private Queue<Integer> randomQueue;
@@ -30,6 +34,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public RedisQueueSpout(Parameters parameters) {
 		this.parameters = new Parameters(parameters);
 		randomQueue = new LinkedList<>();
+		lastWrite = 0;
 	}
 
 	@Override
@@ -47,6 +52,32 @@ public class RedisQueueSpout extends BaseRichSpout {
 		Jedis jedis = getConnectedJedis();
 		if (jedis == null)
 			return;
+
+		if (lastWrite == 0 || lastWrite - System.currentTimeMillis() > Parameters.REPORT_TIME) {
+			long start = System.currentTimeMillis();
+			try {
+				List<String> keys = jedis.lrange(Parameters.REDIS_KGS, 0, len);
+
+				File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+				if (!tempDir.exists())
+					tempDir.mkdirs();
+
+				BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
+				for (String key : keys)
+					writer.write(key);
+				writer.close();
+
+				Runtime runtime = Runtime.getRuntime();
+				runtime.exec("scp /home/admin/roy/temp/" + parameters.getTopologyName()
+						+ "/keys.txt admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+
+			} catch (Exception e) {
+				jedis.set("fail", "");
+			}
+
+			lastWrite = System.currentTimeMillis();
+
+		}
 
 		Object text = getTextByOrder();
 //		Object text = getRandomText();

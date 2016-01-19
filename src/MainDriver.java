@@ -11,6 +11,7 @@ import util.RedisCleaner;
 import util.ReportManager;
 import util.RedisWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -28,6 +29,7 @@ public class MainDriver {
 	public static void main(String[] args) throws Exception {
 
 		Parameters parameters = new Parameters();
+		parameters.setHost(Parameters.LOCAL_HOST);
 
 		TopologyBuilder builder = new TopologyBuilder();
 		ReportManager manager = new ReportManager();
@@ -37,6 +39,10 @@ public class MainDriver {
 
 		if (args.length == 0) {
 			// default: local mode
+			File tempDir = new File("/home/roy/roy/temp/" + parameters.getTopologyName());
+			if (!tempDir.exists())
+				tempDir.mkdirs();
+
 			setup(builder, parameters);
 
 			conf.setMaxTaskParallelism(3);
@@ -87,6 +93,10 @@ public class MainDriver {
 					}
 			}
 
+
+			File tempDir = new File("/home/admin/roy/temp/" + parameters.getTopologyName());
+			if (!tempDir.exists())
+				tempDir.mkdirs();
 
 			startTopology(builder, manager, conf, parameters);
 
