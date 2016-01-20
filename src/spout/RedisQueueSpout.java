@@ -70,7 +70,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 					Runtime runtime = Runtime.getRuntime();
 					runtime.exec("scp" + " "
 							+ parameters.getBaseDir() + parameters.getTopologyName() + "/keys.txt"
-							+ " " + "admin@blade56:~/roy/temp/" + parameters.getTopologyName());
+							+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
 				}
 
 			} catch (Exception e) {

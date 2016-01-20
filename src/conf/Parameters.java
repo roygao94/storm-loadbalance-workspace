@@ -14,8 +14,8 @@ public class Parameters implements Serializable {
 	public static final String REDIS_VM = "192.168.56.143";
 	public static final int REDIS_PORT = 6379;
 
-	public static final String LOCAL_BASE_DIR = "/home/roy/roy/temp";
-	public static final String REMOTE_BASE_DIR = "/home/admin/roy/temp";
+	public static final String LOCAL_BASE_DIR = "/home/roy/Tools/apache-storm-0.10.0/public/roy/";
+	public static final String REMOTE_BASE_DIR = "/home/admin/apache-storm-0.10.0/public/roy/";
 
 	public static final String REDIS_RT = "rt";
 	public static final String REDIS_KGS = "kgs";
