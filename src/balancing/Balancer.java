@@ -24,11 +24,12 @@ public class Balancer {
 		}
 	});
 	public static Map<Integer, Integer> routing;
+	public static Map<Pair<Integer, Integer>, Integer> migrationPlan;
 
 	private static transient Jedis jedis;
 
-	public static Map<Integer, Integer> reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
-		Jedis jedis = getConnectedJedis();
+	public static BalanceInfo reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
+		long start = System.currentTimeMillis();
 
 		if (history == null) {
 			history = new historyS[Parameters.KEY_NUMBER + 1];
@@ -44,16 +45,21 @@ public class Balancer {
 		computeBound(balanceIndex);
 		backup();
 
-//		int routingSize = getRoutingSize();
 		migrateBack();
 
 		migrate();
 
 		updateRouting();
 
-		getCost();
+		long timeElapsed = System.currentTimeMillis() - start;
 
-		return routing;
+		BalanceInfo info = new BalanceInfo();
+		info.setTime(timeElapsed);
+		info.setCost(getCostAndMigrationPlan());
+		info.setRoutingTable(routing);
+		info.setMigrationPlan(migrationPlan);
+
+		return info;
 
 		// push new routing into redis
 	}
@@ -75,22 +81,23 @@ public class Balancer {
 			copyOfNode[i] = new NodeWithCursor(node[i]);
 	}
 
-	private static int getRoutingSize() {
-		int count = 0;
-
-		for (int i = 0; i < N; ++i)
-			for (KGS kgs : node[i].infoList.values())
-				if (kgs.getKey() % N != i)
-					count++;
-
-		return count;
-	}
+//	private static int getRoutingSize() {
+//		int count = 0;
+//
+//		for (int i = 0; i < N; ++i)
+//			for (KGS kgs : node[i].infoList.values())
+//				if (kgs.getKey() % N != i)
+//					count++;
+//
+//		return count;
+//	}
 
 	private static void updateRouting() {
 		if (routing != null)
 			routing.clear();
 		else
 			routing = new HashMap<>();
+
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : node[i].infoList.values())
 				if (kgs.getKey() % N != i)
@@ -265,15 +272,30 @@ public class Balancer {
 		}
 	}
 
-	private static int getCost() {
+	private static int getCostAndMigrationPlan() {
+		if (migrationPlan != null)
+			migrationPlan.clear();
+		else
+			migrationPlan = new HashMap<>();
 		int cost = 0;
 
 		for (int i = 0; i < N; ++i)
-			for (KGS kgs : node[i].infoList.values()) {
-				if (!copyOfNode[i].infoList.containsKey(kgs.getKey()))
+			for (KGS kgs : copyOfNode[i].infoList.values()) {
+				if (!node[i].infoList.containsKey(kgs.getKey())) {
+					for (int j = 0; j < N; ++j)
+						if (node[j].infoList.containsKey(kgs.getKey())) {
+							Pair<Integer, Integer> fromTo = new Pair<>(i, j);
+							if (migrationPlan.containsKey(fromTo))
+								migrationPlan.put(fromTo, migrationPlan.get(fromTo) + kgs.getG());
+							else
+								migrationPlan.put(fromTo, kgs.getG());
+							break;
+						}
+
 					cost += kgs.getS();
-				if (Parameters.WINDOW_SIZE != 1)
-					cost += history[kgs.getKey()].getHistorySum();
+					if (Parameters.WINDOW_SIZE != 1)
+						cost += history[kgs.getKey()].getHistorySum();
+				}
 				history[kgs.getKey()].add(kgs.getS());
 			}
 

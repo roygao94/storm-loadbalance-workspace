@@ -20,6 +20,7 @@ public class RedisWriter {
 
 	public static void main(String[] args) throws IOException {
 		writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
+		writeSkewsToRedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
 //		writer.writeToRedis();
 	}
 
@@ -50,9 +51,8 @@ public class RedisWriter {
 
 	public static void writeSkewsToRedis(String host, int port) throws IOException {
 		Jedis jedis = new Jedis(host, port);
-		double[] skew = new double[]{0.75, 0.8, 0.85, 0.9, 0.95, 1};
 
-		for (Double s : skew)
+		for (Double s : Parameters.skew)
 			if (!jedis.exists(Parameters.REDIS_SKEW + "-" + s)) {
 				ZipfDistribution dist = new ZipfDistribution(Parameters.KEY_NUMBER, s);
 				double minProbability = dist.probability(Parameters.KEY_NUMBER);

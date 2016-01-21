@@ -1,8 +1,10 @@
 package test;
 
+import balancing.BalanceInfo;
 import balancing.Balancer;
 import balancing.util.KGS;
 import balancing.util.NodeWithCursor;
+import balancing.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -33,6 +35,12 @@ public class NodeTest {
 		for (int i = 0; i < 10; ++i)
 			nodeList.put(i, node[i]);
 
-		Balancer.reBalance(nodeList, 0.1);
+		BalanceInfo info = Balancer.reBalance(nodeList, 0.1);
+		System.out.println("time:\t" + info.getTime());
+		System.out.println("routing size:\t" + info.getRoutingSize());
+		System.out.println("cost:\t" + info.getCost());
+		for (Map.Entry<Pair<Integer, Integer>, Integer> entry : info.getMigrationPlan().entrySet())
+			System.out.println(entry.getKey().getFirst() + " --> " + entry.getKey().getSecond()
+					+ "\t" + entry.getValue());
 	}
 }

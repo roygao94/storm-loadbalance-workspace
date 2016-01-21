@@ -5,6 +5,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
+import balancing.BalanceInfo;
 import balancing.Balancer;
 import balancing.util.NodeWithCursor;
 import conf.Parameters;
@@ -102,9 +103,12 @@ public class Controller implements IRichBolt {
 //				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
 
 				if (parameters.getBalance()) {
-					long start = System.currentTimeMillis();
-					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList, parameters.getBalanceIndex());
-					if (newRouting.size() > 0) {
+//					long start = System.currentTimeMillis();
+//					Map<Integer, Integer> newRouting = Balancer.reBalance(detailList, parameters.getBalanceIndex());
+					BalanceInfo info = Balancer.reBalance(detailList, parameters.getBalanceIndex());
+
+					if (info.getRoutingSize() > 0) {
+						Map<Integer, Integer> newRouting = info.getRoutingTable();
 						String routingInfo = "";
 						for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
 							routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
@@ -113,7 +117,7 @@ public class Controller implements IRichBolt {
 						for (int i = 0; i < UBoltNumber; ++i)
 							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
 
-						long timeElapsed = System.currentTimeMillis() - start;
+						long timeElapsed = info.getTime();
 						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound + "--" + timeElapsed,
 								"");
 
@@ -124,7 +128,7 @@ public class Controller implements IRichBolt {
 
 							BufferedWriter writer = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/rebalance.txt"));
-							writer.write(timeElapsed + "ms" + "\n" + newRouting.size());
+							writer.write(timeElapsed + "ms" + "\n" + info.getRoutingSize());
 							writer.close();
 
 							if (parameters.isRemoteMode()) {

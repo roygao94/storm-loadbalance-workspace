@@ -21,6 +21,8 @@ public class Parameters implements Serializable {
 	public static final String REDIS_KGS = "kgs";
 	public static final String REDIS_SKEW = "skew";
 
+	public static final double[] skew = new double[]{0.75, 0.8, 0.85, 0.9, 0.95, 1};
+
 	public static final String REDIS_LOAD = "load";
 	public static final String REDIS_LOAD_REPORT = "load-report";
 	public static final String REDIS_DETAIL = "detail";
