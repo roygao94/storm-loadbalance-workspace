@@ -1,6 +1,7 @@
 package tools;
 
 import conf.Parameters;
+import org.apache.commons.math3.distribution.ZipfDistribution;
 import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;
@@ -47,4 +48,23 @@ public class RedisWriter {
 		jedis.disconnect();
 	}
 
+	public static void writeSkewsToRedis(String host, int port) throws IOException {
+		Jedis jedis = new Jedis(host, port);
+		double[] skew = new double[]{0.75, 0.8, 0.85, 0.9, 0.95, 1};
+
+		for (Double s : skew)
+			if (!jedis.exists(Parameters.REDIS_SKEW + "-" + s)) {
+				ZipfDistribution dist = new ZipfDistribution(Parameters.KEY_NUMBER, s);
+				double minProbability = dist.probability(Parameters.KEY_NUMBER);
+
+				List<Integer> gList = new ArrayList<>();
+				for (int i = 1; i <= Parameters.KEY_NUMBER; ++i)
+					gList.add((int) (dist.probability(i) / minProbability));
+
+				for (int i = 0; i < gList.size(); ++i)
+					jedis.lpush(Parameters.REDIS_SKEW + "-" + s, i + 1 + "," + gList.get(i));
+			}
+
+		jedis.disconnect();
+	}
 }
