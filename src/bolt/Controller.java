@@ -124,7 +124,7 @@ public class Controller implements IRichBolt {
 
 							BufferedWriter writer = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/rebalance.txt"));
-							writer.write(timeElapsed + "ms" + " ," + newRouting.size());
+							writer.write(timeElapsed + "ms" + "\n" + newRouting.size());
 							writer.close();
 
 							if (parameters.isRemoteMode()) {
