@@ -117,9 +117,8 @@ public class Controller implements IRichBolt {
 						for (int i = 0; i < UBoltNumber; ++i)
 							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
 
-						long timeElapsed = info.getTime();
-						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound + "--" + timeElapsed,
-								"");
+						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound,
+								"" + info.getTime());
 
 						try {
 							File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
@@ -128,7 +127,7 @@ public class Controller implements IRichBolt {
 
 							BufferedWriter writer = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/rebalance.txt"));
-							writer.write(timeElapsed + "ms" + "\n" + info.getRoutingSize());
+							writer.write(info.getTime()+ "ms" + "\n" + info.getRoutingSize());
 							writer.close();
 
 							if (parameters.isRemoteMode()) {
