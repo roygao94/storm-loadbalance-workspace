@@ -62,8 +62,12 @@ public class RedisQueueSpout extends BaseRichSpout {
 					tempDir.mkdirs();
 
 				BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
-				for (int i = (int) (len - 1); i >= 0; i -= 100)
-					writer.write(keys.get(i).split(",")[1] + "\n");
+				for (int i = 0; i <= 10; ++i)
+					writer.write(keys.get(i) + "\n");
+				for (int i = 10; i < 100; i += 10)
+					writer.write(keys.get(i) + "\n");
+				for (int i = 100; i < len; i += 100)
+					writer.write(keys.get(i) + "\n");
 				writer.close();
 
 				if (parameters.isRemoteMode()) {

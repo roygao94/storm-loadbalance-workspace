@@ -19,7 +19,7 @@ public class RedisWriter {
 	private int port = Parameters.REDIS_PORT;
 
 	public static void main(String[] args) throws IOException {
-		writeToRedis(Parameters.LOCAL_HOST, Parameters.REDIS_PORT);
+		writeToRedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
 		writeSkewsToRedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
 //		writer.writeToRedis();
 	}
@@ -43,8 +43,8 @@ public class RedisWriter {
 			}
 			reader.close();
 
-			for (int i = 0; i < gList.size(); ++i)
-				jedis.lpush(Parameters.REDIS_KGS, i + "," + gList.get(i));
+			for (int i = gList.size() - 1; i >= 0; --i)
+				jedis.lpush(Parameters.REDIS_KGS, i + 1 + "," + gList.get(i));
 		}
 		jedis.disconnect();
 	}
@@ -61,7 +61,7 @@ public class RedisWriter {
 				for (int i = 1; i <= Parameters.KEY_NUMBER; ++i)
 					gList.add((int) (dist.probability(i) / minProbability));
 
-				for (int i = 0; i < gList.size(); ++i)
+				for (int i = gList.size() - 1; i >= 0; --i)
 					jedis.lpush(Parameters.REDIS_SKEW + "-" + s, i + 1 + "," + gList.get(i));
 			}
 
