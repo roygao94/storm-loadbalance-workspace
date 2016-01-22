@@ -11,7 +11,9 @@ import tools.RedisCleaner;
 import tools.ReportManager;
 import tools.RedisWriter;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -96,6 +98,11 @@ public class MainDriver {
 			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 			if (!tempDir.exists())
 				tempDir.mkdirs();
+			BufferedWriter writer = new BufferedWriter(
+					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
+			writer.write("--ms\n");
+			writer.write("--");
+			writer.close();
 
 			startTopology(builder, manager, conf, parameters);
 
