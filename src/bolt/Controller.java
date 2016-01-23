@@ -8,6 +8,7 @@ import backtype.storm.tuple.Tuple;
 import balancing.BalanceInfo;
 import balancing.Balancer;
 import balancing.util.NodeWithCursor;
+import balancing.util.Pair;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
@@ -127,13 +128,24 @@ public class Controller implements IRichBolt {
 
 							BufferedWriter writer = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/rebalance.txt"));
-							writer.write(info.getTime()+ "ms" + "\n" + info.getRoutingSize());
+							writer.write(info.getTime() + "ms" + "\n" + info.getRoutingSize());
 							writer.close();
+
+							BufferedWriter writer2 = new BufferedWriter(new FileWriter(
+									tempDir.getAbsolutePath() + "/migration.txt"));
+							for (Map.Entry<Pair<Integer, Integer>, Integer> entry
+									: info.getMigrationPlan().entrySet()) {
+								writer2.write(entry.getKey() + "\t" + entry.getValue() + "\n");
+							}
+							writer2.close();
 
 							if (parameters.isRemoteMode()) {
 								Runtime runtime = Runtime.getRuntime();
 								runtime.exec("scp" + " "
 										+ parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"
+										+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
+								runtime.exec("scp" + " "
+										+ parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"
 										+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
 							}
 

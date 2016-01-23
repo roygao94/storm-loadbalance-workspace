@@ -104,6 +104,10 @@ public class MainDriver {
 			writer.write("--");
 			writer.close();
 
+			BufferedWriter writer2 = new BufferedWriter(
+					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"));
+			writer2.close();
+
 			startTopology(builder, manager, conf, parameters);
 
 		} else errorArgs();
