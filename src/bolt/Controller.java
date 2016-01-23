@@ -134,9 +134,9 @@ public class Controller implements IRichBolt {
 							BufferedWriter writer2 = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/migration.txt"));
 							for (Map.Entry<Pair<Integer, Integer>, Integer> entry
-									: info.getMigrationPlan().entrySet()) {
-								writer2.write(entry.getKey() + "\t" + entry.getValue() + "\n");
-							}
+									: info.getMigrationPlan().entrySet())
+								writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
+										+ "," + entry.getValue() + "\n");
 							writer2.close();
 
 							if (parameters.isRemoteMode()) {
