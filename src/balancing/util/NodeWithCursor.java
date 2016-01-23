@@ -1,5 +1,6 @@
 package balancing.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,8 +59,10 @@ public class NodeWithCursor {
 	}
 
 	public void remove(KGS kgs) {
-		infoList.remove(kgs.key);
-		totalLoad -= kgs.g;
+		if (infoList.containsKey(kgs.getKey())) {
+			infoList.remove(kgs.key);
+			totalLoad -= kgs.g;
+		}
 	}
 
 	public void remove(int key) {
@@ -67,5 +70,17 @@ public class NodeWithCursor {
 			totalLoad -= infoList.get(key).g;
 			infoList.remove(key);
 		}
+	}
+
+	public Collection<KGS> values() {
+		return infoList.values();
+	}
+
+	public boolean containsKey(KGS kgs) {
+		return infoList.containsKey(kgs.getKey());
+	}
+
+	public boolean containsKey(int key) {
+		return infoList.containsKey(key);
 	}
 }

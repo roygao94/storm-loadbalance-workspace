@@ -26,7 +26,6 @@ public class Balancer {
 	public static Map<Integer, Integer> routing;
 	public static Map<Pair<Integer, Integer>, Integer> migrationPlan;
 
-	private static transient Jedis jedis;
 
 	public static BalanceInfo reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
 		long start = System.currentTimeMillis();
@@ -85,7 +84,7 @@ public class Balancer {
 //		int count = 0;
 //
 //		for (int i = 0; i < N; ++i)
-//			for (KGS kgs : node[i].infoList.values())
+//			for (KGS kgs : node[i].values())
 //				if (kgs.getKey() % N != i)
 //					count++;
 //
@@ -99,7 +98,7 @@ public class Balancer {
 			routing = new HashMap<>();
 
 		for (int i = 0; i < N; ++i)
-			for (KGS kgs : node[i].infoList.values())
+			for (KGS kgs : node[i].values())
 				if (kgs.getKey() % N != i)
 					routing.put(kgs.getKey(), i);
 	}
@@ -107,7 +106,7 @@ public class Balancer {
 	private static void migrateBack() {
 		List<MigrationKGS> backList = new ArrayList<>();
 		for (int i = 0; i < N; ++i) {
-			for (KGS kgs : node[i].infoList.values()) {
+			for (KGS kgs : node[i].values()) {
 				if (kgs.getKey() % N != i) {
 					backList.add(new MigrationKGS(i, kgs));
 				}
@@ -140,7 +139,7 @@ public class Balancer {
 
 	private static Map<Integer, KGS> getMigrationOutGroup(int i) {
 		int cursor = node[i].getCursor();
-		List<KGS> thisNode = new ArrayList<>(node[i].infoList.values());
+		List<KGS> thisNode = new ArrayList<>(node[i].values());
 		Collections.sort(thisNode, new Comparator<KGS>() {
 			@Override
 			public int compare(KGS o1, KGS o2) {
@@ -280,10 +279,10 @@ public class Balancer {
 		int cost = 0;
 
 		for (int i = 0; i < N; ++i)
-			for (KGS kgs : copyOfNode[i].infoList.values()) {
-				if (!node[i].infoList.containsKey(kgs.getKey())) {
+			for (KGS kgs : copyOfNode[i].values()) {
+				if (!node[i].containsKey(kgs.getKey())) {
 					for (int j = 0; j < N; ++j)
-						if (node[j].infoList.containsKey(kgs.getKey())) {
+						if (node[j].containsKey(kgs.getKey())) {
 							Pair<Integer, Integer> fromTo = new Pair<>(i, j);
 							if (migrationPlan.containsKey(fromTo))
 								migrationPlan.put(fromTo, migrationPlan.get(fromTo) + kgs.getG());
@@ -300,18 +299,5 @@ public class Balancer {
 			}
 
 		return cost;
-	}
-
-	private static Jedis getConnectedJedis() {
-		if (jedis != null)
-			return jedis;
-
-		try {
-			jedis = new Jedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return jedis;
 	}
 }
