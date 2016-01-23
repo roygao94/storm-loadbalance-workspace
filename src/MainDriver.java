@@ -22,7 +22,7 @@ import java.io.IOException;
 public class MainDriver {
 
 	/*
-	strom jar MainDriver.jar MainDriver
+	storm jar MainDriver.jar MainDriver
 	[task-name] load-balance  [local|remote] remote  [ignore|balance] ignore...
 	default: local mode
 	*/
@@ -100,7 +100,7 @@ public class MainDriver {
 				tempDir.mkdirs();
 			BufferedWriter writer = new BufferedWriter(
 					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
-			writer.write("--ms\n");
+			writer.write("--\n");
 			writer.write("--");
 			writer.close();
 

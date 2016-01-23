@@ -26,6 +26,7 @@ public class NodeWithCursor {
 	}
 
 	public NodeWithCursor(int ID, String detailInfo) {
+		this.ID = ID;
 		infoList = new HashMap<>();
 		String[] kgsList = detailInfo.split("\t");
 		for (String kgs : kgsList) {

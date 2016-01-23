@@ -58,6 +58,14 @@ public class Balancer {
 		info.setRoutingTable(routing);
 		info.setMigrationPlan(migrationPlan);
 
+		boolean[] temp = new boolean[N];
+		for (int i = 0; i < N; ++i)
+			temp[i] = false;
+		for (Pair<Integer, Integer> pair : migrationPlan.keySet())
+			temp[pair.getFirst()] = temp[pair.getSecond()] = true;
+
+		info.setUnrelated(temp);
+
 		return info;
 
 		// push new routing into redis

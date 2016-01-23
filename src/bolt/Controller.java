@@ -131,8 +131,18 @@ public class Controller implements IRichBolt {
 							writer.write(info.getTime() + "ms" + "\n" + info.getRoutingSize());
 							writer.close();
 
+
 							BufferedWriter writer2 = new BufferedWriter(new FileWriter(
 									tempDir.getAbsolutePath() + "/migration.txt"));
+
+							String line = "";
+							for (int i = 0; i < info.getUnrelated().size(); ++i)
+								line += info.getUnrelated().get(i) + ",";
+							line = line.substring(0, line.length() - 1);
+							writer2.write(line);
+
+							writer2.write("\n|\n");
+
 							for (Map.Entry<Pair<Integer, Integer>, Integer> entry
 									: info.getMigrationPlan().entrySet())
 								writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
