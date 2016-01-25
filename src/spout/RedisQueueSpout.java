@@ -21,6 +21,8 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public static final String OUTPUT_FIELD = "text";
 	protected SpoutOutputCollector _collector;
 
+	int DBoltNumber;
+
 	private Parameters parameters;
 	//	private String host;
 //	private int port = Parameters.REDIS_PORT;
@@ -45,6 +47,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	@Override
 	public void open(Map map, TopologyContext context, SpoutOutputCollector collector) {
 		_collector = collector;
+		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
 	}
 
 	@Override
@@ -96,8 +99,12 @@ public class RedisQueueSpout extends BaseRichSpout {
 	private Object getTextByOrder() {
 		Object text = null;
 		text = jedis.lindex(Parameters.REDIS_KGS, count);
-		if (++count >= len)
+		if (++count >= len) {
+			for (int i = 0; i < DBoltNumber; ++i)
+				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
+
 			count = 0;
+		}
 
 		return text;
 	}

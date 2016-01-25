@@ -79,14 +79,14 @@ public class Controller implements IRichBolt {
 
 						for (int i = 0; i < DBoltNumber; ++i) {
 							jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_DETAIL + i, "");
-//							jedis.lpush(head + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
+							jedis.lpush(parameters.getRedisHead() + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
 					}
 
-//				if (balanced)
-//					for (int i = 0; i < DBoltNumber; ++i)
-//						jedis.lpush(head + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
+				if (balanced)
+					for (int i = 0; i < DBoltNumber; ++i)
+						jedis.lpush(parameters.getRedisHead() + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
 
 				loadList.clear();
 				loadReportRound++;
