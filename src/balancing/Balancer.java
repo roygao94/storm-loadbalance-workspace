@@ -113,13 +113,10 @@ public class Balancer {
 
 	private static void migrateBack() {
 		List<MigrationKGS> backList = new ArrayList<>();
-		for (int i = 0; i < N; ++i) {
-			for (KGS kgs : node[i].values()) {
-				if (kgs.getKey() % N != i) {
+		for (int i = 0; i < N; ++i)
+			for (KGS kgs : node[i].values())
+				if (kgs.getKey() % N != i)
 					backList.add(new MigrationKGS(i, kgs));
-				}
-			}
-		}
 
 
 		for (MigrationKGS migrationKGS : backList) {

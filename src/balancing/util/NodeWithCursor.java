@@ -53,14 +53,14 @@ public class NodeWithCursor {
 
 	public void add(KGS kgs) {
 		if (infoList.isEmpty())
-			setCursor(kgs.getG() * 2);
+			setCursor(kgs.g * 2);
 
 		infoList.put(kgs.key, kgs);
 		totalLoad += kgs.g;
 	}
 
 	public void remove(KGS kgs) {
-		if (infoList.containsKey(kgs.getKey())) {
+		if (infoList.containsKey(kgs.key)) {
 			infoList.remove(kgs.key);
 			totalLoad -= kgs.g;
 		}
@@ -78,7 +78,7 @@ public class NodeWithCursor {
 	}
 
 	public boolean containsKey(KGS kgs) {
-		return infoList.containsKey(kgs.getKey());
+		return infoList.containsKey(kgs.key);
 	}
 
 	public boolean containsKey(int key) {
