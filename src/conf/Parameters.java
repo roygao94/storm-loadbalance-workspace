@@ -27,6 +27,8 @@ public class Parameters implements Serializable {
 	public static final String REDIS_LOAD_REPORT = "load-report";
 	public static final String REDIS_DETAIL = "detail";
 	public static final String REDIS_DETAIL_REPORT = "detail-report";
+	public static final String REDIS_D_CONTINUE = "d-continue";
+	public static final String REDIS_U_WAIT = "u-wait";
 
 	public static final String DEFAULT_TOPOLOGY_NAME = "load-balance-driver";
 	public static final String SPOUT_NAME = "spout";

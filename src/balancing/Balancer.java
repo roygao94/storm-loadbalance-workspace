@@ -26,6 +26,7 @@ public class Balancer {
 	public static Map<Integer, Integer> routing;
 	public static Map<Pair<Integer, Integer>, Integer> migrationPlan;
 
+	private static transient Jedis jedis;
 
 	public static BalanceInfo reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
 		long start = System.currentTimeMillis();
@@ -143,6 +144,7 @@ public class Balancer {
 	}
 
 	private static Map<Integer, KGS> getMigrationOutGroup(int i) {
+		Jedis jedis = getConnectedJedis();
 		int cursor = node[i].getCursor();
 		List<KGS> thisNode = new ArrayList<>(node[i].values());
 		Collections.sort(thisNode, new Comparator<KGS>() {
@@ -219,6 +221,8 @@ public class Balancer {
 
 			return moveList;
 		} else {
+//			jedis.set("TOPO-R-B-node " + i + ":   " + sumG + " " + minGoal, "");
+//			jedis.set("TOPO-R-B-node " + i + ":   " + node[i].getCursor(), "");
 			System.out.println("node " + i + " cannot be balanced");
 			return new HashMap<>();
 		}
@@ -304,5 +308,18 @@ public class Balancer {
 			}
 
 		return cost;
+	}
+
+	private static Jedis getConnectedJedis() {
+		if (jedis != null)
+			return jedis;
+
+		try {
+			jedis = new Jedis(Parameters.REMOTE_HOST, Parameters.REDIS_PORT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jedis;
 	}
 }

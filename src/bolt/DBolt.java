@@ -23,7 +23,7 @@ public class DBolt implements IRichBolt {
 	int myNumber;
 
 	private Parameters parameters;
-//	private boolean balance;
+	//	private boolean balance;
 //	private String host;
 //	private String head;
 //	private int port = Parameters.REDIS_PORT;
@@ -60,15 +60,21 @@ public class DBolt implements IRichBolt {
 			load = 0;
 			jedis.del(parameters.getRedisHead() + Parameters.REDIS_LOAD + myNumber);
 
-		} else if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)) {
-			// emit detail to Controller
-			String detailInfo = getDetailInfo();
-			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
-			// infoList.clear();
-			jedis.del(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber);
+			while (!jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)
+					&& !jedis.exists(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber))
+				;
 
+			if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)) {
+				// emit detail to Controller
+				String detailInfo = getDetailInfo();
+				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+						new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
+				infoList.clear();
+				jedis.del(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber);
+
+			} else jedis.del(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber);
 		}
+
 //		}
 		// record kgs info and put pressure
 		int key = (int) tuple.getValue(0);
@@ -83,16 +89,16 @@ public class DBolt implements IRichBolt {
 
 	private String getDetailInfo() {
 		String detailInfo = "";
-//		List<Map.Entry<Integer, KGS>> tempList = new ArrayList<>(infoList.entrySet());
-//
-//		Collections.sort(tempList, new Comparator<Map.Entry<Integer, KGS>>() {
-//			@Override
-//			public int compare(Map.Entry<Integer, KGS> o1, Map.Entry<Integer, KGS> o2) {
-//				return o1.getValue().compareTo(o2.getValue());
-//			}
-//		});
+		List<Map.Entry<Integer, KGS>> tempList = new ArrayList<>(infoList.entrySet());
 
-		for (Map.Entry<Integer, KGS> entry : infoList.entrySet())
+		Collections.sort(tempList, new Comparator<Map.Entry<Integer, KGS>>() {
+			@Override
+			public int compare(Map.Entry<Integer, KGS> o1, Map.Entry<Integer, KGS> o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+
+		for (Map.Entry<Integer, KGS> entry : tempList)
 			detailInfo += entry.getValue().getKey() + ","
 					+ entry.getValue().getG() + ","
 					+ entry.getValue().getS() + "\t";

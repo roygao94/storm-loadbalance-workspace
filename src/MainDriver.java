@@ -133,7 +133,7 @@ public class MainDriver {
 	                                  Config conf, Parameters parameters) throws Exception {
 		setup(builder, parameters);
 
-		conf.setNumWorkers(10);
+		conf.setNumWorkers(22);
 		StormSubmitter.submitTopologyWithProgressBar(parameters.getTopologyName(), conf, builder.createTopology());
 
 //		if (parameters.BALANCE) {

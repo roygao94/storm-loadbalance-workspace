@@ -25,6 +25,7 @@ public class Controller implements IRichBolt {
 
 	TopologyContext context;
 	OutputCollector _collector;
+	int UBoltNumber;
 	int DBoltNumber;
 
 	private Parameters parameters;
@@ -47,6 +48,7 @@ public class Controller implements IRichBolt {
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		_collector = collector;
+		UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
 
 		loadList = new HashMap<>();
@@ -79,14 +81,17 @@ public class Controller implements IRichBolt {
 
 						for (int i = 0; i < DBoltNumber; ++i) {
 							jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_DETAIL + i, "");
-							jedis.lpush(parameters.getRedisHead() + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
+//							jedis.lpush(parameters.getRedisHead() + "imbalanced-" + loadReportRound, i + "-" + loadList.get(i));
 						}
 						break;
 					}
 
-				if (balanced)
-					for (int i = 0; i < DBoltNumber; ++i)
-						jedis.lpush(parameters.getRedisHead() + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
+				if (balanced) {
+					for (int i = 0; i < DBoltNumber; ++i) {
+						jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + i, "");
+//						jedis.lpush(parameters.getRedisHead() + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
+					}
+				}
 
 				loadList.clear();
 				loadReportRound++;
@@ -101,7 +106,9 @@ public class Controller implements IRichBolt {
 			detailList.put(boltNumber, node);
 
 			if (detailList.size() == DBoltNumber) {
-//				jedis.lpush(head + Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound + "-all-received", "");
+//				for (int i = 0; i < DBoltNumber; ++i)
+//					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_DETAIL_REPORT
+//							+ "-" + detailReportRound + "-all-received", i + "-" + detailList.get(i).getTotalLoad());
 
 				if (parameters.getBalance()) {
 //					long start = System.currentTimeMillis();
@@ -117,6 +124,7 @@ public class Controller implements IRichBolt {
 						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 						for (int i = 0; i < UBoltNumber; ++i)
 							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
+//						jedis.set(parameters.getRedisHead() + "routing-" + detailReportRound, routingInfo);
 
 						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound,
 								"" + info.getTime());

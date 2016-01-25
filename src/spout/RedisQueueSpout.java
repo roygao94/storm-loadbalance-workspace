@@ -21,13 +21,15 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public static final String OUTPUT_FIELD = "text";
 	protected SpoutOutputCollector _collector;
 
+	int UBoltNumber;
 	int DBoltNumber;
 
 	private Parameters parameters;
 	//	private String host;
 //	private int port = Parameters.REDIS_PORT;
 	private long len = 0;
-	private static long count = 0;
+	private static long count;
+	private static int count2;
 	private long lastWrite = 0;
 	private transient Jedis jedis = null;
 
@@ -47,7 +49,10 @@ public class RedisQueueSpout extends BaseRichSpout {
 	@Override
 	public void open(Map map, TopologyContext context, SpoutOutputCollector collector) {
 		_collector = collector;
+		UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
+		count = 0;
+		count2 = 0;
 	}
 
 	@Override
@@ -100,10 +105,14 @@ public class RedisQueueSpout extends BaseRichSpout {
 		Object text = null;
 		text = jedis.lindex(Parameters.REDIS_KGS, count);
 		if (++count >= len) {
+			count = 0;
+//			if (++count2 >= 10) {
+			for (int i = 0; i < UBoltNumber; ++i)
+				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
 			for (int i = 0; i < DBoltNumber; ++i)
 				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
-
-			count = 0;
+//				count2 = 0;
+//			}
 		}
 
 		return text;
