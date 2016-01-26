@@ -116,7 +116,7 @@ public class DBolt implements IRichBolt {
 
 	private double calculatePi() {
 		double pi = 0;
-		for (int n = 0; n <= 5000; ++n)
+		for (int n = 0; n <= 500000; ++n)
 			pi += (n % 2 == 0 ? 1 : -1) / (2 * n + 1);
 		return pi;
 	}

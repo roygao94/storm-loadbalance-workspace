@@ -29,10 +29,11 @@ public class RedisQueueSpout extends BaseRichSpout {
 //	private int port = Parameters.REDIS_PORT;
 	private String skewName;
 	private long len = 0;
-	private static long index;
+	private static int index;
 	private static int cycle;
 	private static int loop;
-//	private long lastWrite = 0;
+	private static List<String> mySkew;
+	//	private long lastWrite = 0;
 	private transient Jedis jedis = null;
 
 	private Queue<Integer> randomQueue;
@@ -76,15 +77,16 @@ public class RedisQueueSpout extends BaseRichSpout {
 	}
 
 	private Object getTextByOrder() {
-		Object text = null;
-		text = jedis.lindex(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop], index);
+		Object text = mySkew.get(index);
 		if (++index >= len) {
 			index = 0;
-			if (++cycle >= 5) {
-//			for (int i = 0; i < UBoltNumber; ++i)
-//				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
+			cycle++;
+			if (cycle % 3 == 0)
 				for (int i = 0; i < DBoltNumber; ++i)
 					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
+			if (cycle >= 8) {
+//			for (int i = 0; i < UBoltNumber; ++i)
+//				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
 				cycle = 0;
 				if (++loop >= Parameters.skew.length)
 					loop = 0;
@@ -96,22 +98,22 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 	private void reportSkew() {
 		try {
-			List<String> keys = jedis.lrange(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop], 0, len);
+			mySkew = jedis.lrange(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop], 0, len);
 
 			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 			if (!tempDir.exists())
 				tempDir.mkdirs();
 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
-			int first = Integer.parseInt(keys.get(0).split(",")[1]);
+			int first = Integer.parseInt(mySkew.get(0).split(",")[1]);
 
 			int prev = 0, last = first;
-			writer.write(keys.get(0) + "\n");
+			writer.write(mySkew.get(0) + "\n");
 			for (int i = 1; i < first; ) {
-				while (last - Integer.parseInt(keys.get(i).split(",")[1]) < 100 && i - prev < 10)
+				while (last - Integer.parseInt(mySkew.get(i).split(",")[1]) < 100 && i - prev < 10)
 					i++;
-				writer.write(keys.get(i) + "\n");
-				last = Integer.parseInt(keys.get(i).split(",")[1]);
+				writer.write(mySkew.get(i) + "\n");
+				last = Integer.parseInt(mySkew.get(i).split(",")[1]);
 				prev = i;
 			}
 

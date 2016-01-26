@@ -129,7 +129,7 @@ public class Controller implements IRichBolt {
 						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound,
 								"" + info.getTime());
 
-						balanceReport(info);
+						reportBalance(info);
 					}
 				}
 				// send massage to update routing table and adjust bolts
@@ -141,7 +141,7 @@ public class Controller implements IRichBolt {
 		}
 	}
 
-	private void balanceReport(BalanceInfo info) {
+	private void reportBalance(BalanceInfo info) {
 		try {
 			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
 			if (!tempDir.exists())
