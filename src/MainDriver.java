@@ -100,9 +100,9 @@ public class MainDriver {
 				tempDir.mkdirs();
 			BufferedWriter writer = new BufferedWriter(
 					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/load.txt"));
-			writer.write(0 + "," + 0);
+			writer.write("d-bolt " + 0 + "," + 0);
 			for (int i = 1; i < Parameters.DBOLT_NUMBER; ++i)
-				writer.write("\n" + i + "," + 0);
+				writer.write("\nd-bolt " + i + "," + 0);
 			writer.close();
 
 			BufferedWriter writer1 = new BufferedWriter(

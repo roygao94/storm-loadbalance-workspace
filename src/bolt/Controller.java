@@ -151,9 +151,9 @@ public class Controller implements IRichBolt {
 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(
 					tempDir.getAbsolutePath() + "/load.txt"));
-			writer.write(0 + "," + loadList.get(0));
+			writer.write("d-bolt " + 0 + "," + loadList.get(0));
 			for (int i = 1; i < DBoltNumber; ++i)
-				writer.write("\n" + i + "," + loadList.get(i));
+				writer.write("\nd-bolt " + i + "," + loadList.get(i));
 			writer.close();
 
 			if (parameters.isRemoteMode()) {
