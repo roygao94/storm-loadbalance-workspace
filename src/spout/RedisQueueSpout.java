@@ -77,7 +77,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 				for (int i = 1; i < first; ) {
 					while (last - Integer.parseInt(keys.get(i).split(",")[1]) < 100 && i - prev < 10)
 						i++;
-					writer.write(keys.get(i));
+					writer.write(keys.get(i) + "\n");
 					last = Integer.parseInt(keys.get(i).split(",")[1]);
 					prev = i;
 				}
