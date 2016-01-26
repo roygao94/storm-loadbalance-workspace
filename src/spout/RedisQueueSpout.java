@@ -64,8 +64,10 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-		if (cycle == 0 && index == 0)
+		if (cycle == 0 && index == 0) {
+			len = jedis.llen(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop]);
 			reportSkew();
+		}
 		Object text = getTextByOrder();
 //		Object text = getRandomText();
 
@@ -153,7 +155,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 		try {
 			jedis = new Jedis(parameters.getHost(), Parameters.REDIS_PORT);
-			len = jedis.llen(Parameters.REDIS_KGS);
+//			len = jedis.llen(Parameters.REDIS_KGS);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
