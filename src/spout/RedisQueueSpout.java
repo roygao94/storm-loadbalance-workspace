@@ -25,12 +25,14 @@ public class RedisQueueSpout extends BaseRichSpout {
 	int DBoltNumber;
 
 	private Parameters parameters;
-	//	private String host;
+//	private String host;
 //	private int port = Parameters.REDIS_PORT;
+	private String skewName;
 	private long len = 0;
-	private static long count;
-	private static int count2;
-	private long lastWrite = 0;
+	private static long index;
+	private static int cycle;
+	private static int loop;
+//	private long lastWrite = 0;
 	private transient Jedis jedis = null;
 
 	private Queue<Integer> randomQueue;
@@ -38,7 +40,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	public RedisQueueSpout(Parameters parameters) {
 		this.parameters = new Parameters(parameters);
 		randomQueue = new LinkedList<>();
-		lastWrite = 0;
+//		lastWrite = 0;
 	}
 
 	@Override
@@ -51,8 +53,9 @@ public class RedisQueueSpout extends BaseRichSpout {
 		_collector = collector;
 		UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
 		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
-		count = 0;
-		count2 = 0;
+		index = 0;
+		cycle = 0;
+		loop = 0;
 	}
 
 	@Override
@@ -61,49 +64,8 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-		if (lastWrite == 0 || System.currentTimeMillis() - lastWrite > Parameters.REPORT_TIME * 10) {
-			try {
-				List<String> keys = jedis.lrange(Parameters.REDIS_KGS, 0, len);
-
-				File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
-				if (!tempDir.exists())
-					tempDir.mkdirs();
-
-				BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
-				int first = Integer.parseInt(keys.get(0).split(",")[1]);
-
-				int prev = 0, last = first;
-				writer.write(keys.get(0) + "\n");
-				for (int i = 1; i < first; ) {
-					while (last - Integer.parseInt(keys.get(i).split(",")[1]) < 100 && i - prev < 10)
-						i++;
-					writer.write(keys.get(i) + "\n");
-					last = Integer.parseInt(keys.get(i).split(",")[1]);
-					prev = i;
-				}
-
-//				for (int i = 0; i <= 7; ++i)
-//					writer.write(keys.get(i) + "\n");
-//				for (int i = 10; i < 100; i += 15)
-//					writer.write(keys.get(i) + "\n");
-//				for (int i = 100; i < first; i += 10)
-//					writer.write(keys.get(i) + "\n");
-				writer.close();
-
-				if (parameters.isRemoteMode()) {
-					Runtime runtime = Runtime.getRuntime();
-					runtime.exec("scp" + " "
-							+ parameters.getBaseDir() + parameters.getTopologyName() + "/keys.txt"
-							+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
-				}
-
-			} catch (Exception e) {
-			}
-
-			lastWrite = System.currentTimeMillis();
-
-		}
-
+		if (cycle == 0 && index == 0)
+			reportSkew();
 		Object text = getTextByOrder();
 //		Object text = getRandomText();
 
@@ -113,19 +75,55 @@ public class RedisQueueSpout extends BaseRichSpout {
 
 	private Object getTextByOrder() {
 		Object text = null;
-		text = jedis.lindex(Parameters.REDIS_KGS, count);
-		if (++count >= len) {
-			count = 0;
-			if (++count2 >= 5) {
+		text = jedis.lindex(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop], index);
+		if (++index >= len) {
+			index = 0;
+			if (++cycle >= 5) {
 //			for (int i = 0; i < UBoltNumber; ++i)
 //				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
 				for (int i = 0; i < DBoltNumber; ++i)
 					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
-				count2 = 0;
+				cycle = 0;
+				if (++loop >= Parameters.skew.length)
+					loop = 0;
 			}
 		}
 
 		return text;
+	}
+
+	private void reportSkew() {
+		try {
+			List<String> keys = jedis.lrange(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop], 0, len);
+
+			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
+			if (!tempDir.exists())
+				tempDir.mkdirs();
+
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
+			int first = Integer.parseInt(keys.get(0).split(",")[1]);
+
+			int prev = 0, last = first;
+			writer.write(keys.get(0) + "\n");
+			for (int i = 1; i < first; ) {
+				while (last - Integer.parseInt(keys.get(i).split(",")[1]) < 100 && i - prev < 10)
+					i++;
+				writer.write(keys.get(i) + "\n");
+				last = Integer.parseInt(keys.get(i).split(",")[1]);
+				prev = i;
+			}
+
+			writer.close();
+
+			if (parameters.isRemoteMode()) {
+				Runtime runtime = Runtime.getRuntime();
+				runtime.exec("scp" + " "
+						+ parameters.getBaseDir() + parameters.getTopologyName() + "/keys.txt"
+						+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
+			}
+
+		} catch (Exception e) {
+		}
 	}
 
 	private Object getRandomText() {
