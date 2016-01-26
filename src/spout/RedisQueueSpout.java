@@ -105,14 +105,15 @@ public class RedisQueueSpout extends BaseRichSpout {
 				tempDir.mkdirs();
 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
+			writer.write(Parameters.skew[loop] + "\n");
 			int first = Integer.parseInt(mySkew.get(0).split(",")[1]);
 
 			int prev = 0, last = first;
-			writer.write(mySkew.get(0) + "\n");
+			writer.write(mySkew.get(0));
 			for (int i = 1; i < first; ) {
 				while (last - Integer.parseInt(mySkew.get(i).split(",")[1]) < 100 && i - prev < 10)
 					i++;
-				writer.write(mySkew.get(i) + "\n");
+				writer.write("\n" + mySkew.get(i));
 				last = Integer.parseInt(mySkew.get(i).split(",")[1]);
 				prev = i;
 			}
