@@ -99,10 +99,17 @@ public class MainDriver {
 			if (!tempDir.exists())
 				tempDir.mkdirs();
 			BufferedWriter writer = new BufferedWriter(
-					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
-			writer.write("--\n");
-			writer.write("--");
+					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/load.txt"));
+			writer.write(0 + "," + 0);
+			for (int i = 1; i < Parameters.DBOLT_NUMBER; ++i)
+				writer.write("\n" + i + "," + 0);
 			writer.close();
+
+			BufferedWriter writer1 = new BufferedWriter(
+					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
+			writer1.write("--\n");
+			writer1.write("--");
+			writer1.close();
 
 			BufferedWriter writer2 = new BufferedWriter(
 					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"));
