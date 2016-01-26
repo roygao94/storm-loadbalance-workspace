@@ -93,6 +93,8 @@ public class Controller implements IRichBolt {
 					}
 				}
 
+				reportLoad(loadList);
+
 				loadList.clear();
 				loadReportRound++;
 			}
@@ -138,6 +140,28 @@ public class Controller implements IRichBolt {
 				detailReportRound++;
 			}
 
+		}
+	}
+
+	private void reportLoad(Map<Integer, Integer> loadList) {
+		try {
+			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
+			if (!tempDir.exists())
+				tempDir.mkdirs();
+
+			BufferedWriter writer = new BufferedWriter(new FileWriter(
+					tempDir.getAbsolutePath() + "/load.txt"));
+			writer.write(0 + "," + loadList.get(0));
+			for (int i = 1; i < DBoltNumber; ++i)
+				writer.write("\n" + i + "," + loadList.get(i));
+			writer.close();
+
+			if (parameters.isRemoteMode()) {
+				Runtime runtime = Runtime.getRuntime();
+				runtime.exec("scp" + " " + parameters.getBaseDir() + parameters.getTopologyName() + "/load.txt"
+						+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
+			}
+		} catch (Exception e) {
 		}
 	}
 
