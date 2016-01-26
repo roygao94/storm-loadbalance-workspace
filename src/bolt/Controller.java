@@ -129,46 +129,7 @@ public class Controller implements IRichBolt {
 						jedis.lpush(parameters.getRedisHead() + "rebalanced-" + detailReportRound,
 								"" + info.getTime());
 
-						try {
-							File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
-							if (!tempDir.exists())
-								tempDir.mkdirs();
-
-							BufferedWriter writer = new BufferedWriter(new FileWriter(
-									tempDir.getAbsolutePath() + "/rebalance.txt"));
-							writer.write(info.getTime() + "ms" + "\n" + info.getRoutingSize());
-							writer.close();
-
-
-							BufferedWriter writer2 = new BufferedWriter(new FileWriter(
-									tempDir.getAbsolutePath() + "/migration.txt"));
-
-							String line = "";
-							for (int i = 0; i < info.getUnrelated().size(); ++i)
-								line += info.getUnrelated().get(i) + ",";
-							line = line.substring(0, line.length() - 1);
-							writer2.write(line);
-
-							writer2.write("\n|\n");
-
-							for (Map.Entry<Pair<Integer, Integer>, Integer> entry
-									: info.getMigrationPlan().entrySet())
-								writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
-										+ "," + entry.getValue() + "\n");
-							writer2.close();
-
-							if (parameters.isRemoteMode()) {
-								Runtime runtime = Runtime.getRuntime();
-								runtime.exec("scp" + " "
-										+ parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"
-										+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
-								runtime.exec("scp" + " "
-										+ parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"
-										+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
-							}
-
-						} catch (Exception e) {
-						}
+						balanceReport(info);
 					}
 				}
 				// send massage to update routing table and adjust bolts
@@ -177,6 +138,49 @@ public class Controller implements IRichBolt {
 				detailReportRound++;
 			}
 
+		}
+	}
+
+	private void balanceReport(BalanceInfo info) {
+		try {
+			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
+			if (!tempDir.exists())
+				tempDir.mkdirs();
+
+			BufferedWriter writer = new BufferedWriter(new FileWriter(
+					tempDir.getAbsolutePath() + "/rebalance.txt"));
+			writer.write(info.getTime() + "ms" + "\n" + info.getRoutingSize());
+			writer.close();
+
+
+			BufferedWriter writer2 = new BufferedWriter(new FileWriter(
+					tempDir.getAbsolutePath() + "/migration.txt"));
+
+			String line = "";
+			for (int i = 0; i < info.getUnrelated().size(); ++i)
+				line += info.getUnrelated().get(i) + ",";
+			line = line.substring(0, line.length() - 1);
+			writer2.write(line);
+
+			writer2.write("\n|\n");
+
+			for (Map.Entry<Pair<Integer, Integer>, Integer> entry
+					: info.getMigrationPlan().entrySet())
+				writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
+						+ "," + entry.getValue() + "\n");
+			writer2.close();
+
+			if (parameters.isRemoteMode()) {
+				Runtime runtime = Runtime.getRuntime();
+				runtime.exec("scp" + " "
+						+ parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"
+						+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
+				runtime.exec("scp" + " "
+						+ parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"
+						+ " " + "admin@blade56:~/apache-storm-0.10.0/public/roy/" + parameters.getTopologyName());
+			}
+
+		} catch (Exception e) {
 		}
 	}
 
