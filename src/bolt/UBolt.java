@@ -49,14 +49,14 @@ public class UBolt implements IRichBolt {
 	public void execute(Tuple tuple) {
 		Jedis jedis = getConnectedJedis();
 
-//		if (balance) {
-		if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + myNumber)) {
-			jedis.del(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + myNumber);
-			try {
-				Thread.sleep(1000);
-			} catch (Exception e) {
-			}
-		}
+////		if (balance) {
+//		if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + myNumber)) {
+//			jedis.del(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + myNumber);
+//			try {
+//				Thread.sleep(1000);
+//			} catch (Exception e) {
+//			}
+//		}
 
 		if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_RT + myNumber)) {
 			// update routing table

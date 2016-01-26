@@ -72,9 +72,9 @@ public class RedisQueueSpout extends BaseRichSpout {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(tempDir.getAbsolutePath() + "/keys.txt"));
 				int first = Integer.parseInt(keys.get(0).split(",")[1]);
 
-				for (int i = 0; i <= 10; ++i)
+				for (int i = 0; i <= 7; ++i)
 					writer.write(keys.get(i) + "\n");
-				for (int i = 10; i < 100; i += 30)
+				for (int i = 10; i < 100; i += 15)
 					writer.write(keys.get(i) + "\n");
 				for (int i = 100; i < first; i += 10)
 					writer.write(keys.get(i) + "\n");
@@ -106,13 +106,13 @@ public class RedisQueueSpout extends BaseRichSpout {
 		text = jedis.lindex(Parameters.REDIS_KGS, count);
 		if (++count >= len) {
 			count = 0;
-//			if (++count2 >= 10) {
-			for (int i = 0; i < UBoltNumber; ++i)
-				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
-			for (int i = 0; i < DBoltNumber; ++i)
-				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
-//				count2 = 0;
-//			}
+			if (++count2 >= 5) {
+//			for (int i = 0; i < UBoltNumber; ++i)
+//				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
+				for (int i = 0; i < DBoltNumber; ++i)
+					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
+				count2 = 0;
+			}
 		}
 
 		return text;

@@ -61,7 +61,7 @@ public class Controller implements IRichBolt {
 		Jedis jedis = getConnectedJedis();
 		String reportHead = tuple.getValue(0).toString();
 
-		if (reportHead.equals(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound)) {
+		if (reportHead.equals(Parameters.LOAD_REPORT + "-" + loadReportRound)) {
 			// receive summary report from DBolt
 			int boltNumber = (int) tuple.getValue(1);
 			int boltLoad = (int) tuple.getValue(2);
@@ -88,8 +88,8 @@ public class Controller implements IRichBolt {
 
 				if (balanced) {
 					for (int i = 0; i < DBoltNumber; ++i) {
-						jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + i, "");
-//						jedis.lpush(parameters.getRedisHead() + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
+//						jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + i, "");
+						jedis.lpush(parameters.getRedisHead() + "balanced-" + loadReportRound, i + "-" + loadList.get(i));
 					}
 				}
 
@@ -97,7 +97,7 @@ public class Controller implements IRichBolt {
 				loadReportRound++;
 			}
 
-		} else if (reportHead.equals(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound)) {
+		} else if (reportHead.equals(Parameters.DETAIL_REPORT + "-" + detailReportRound)) {
 			// receive detail report from DBolt
 			int boltNumber = (int) tuple.getValue(1);
 			String detailInfo = tuple.getValue(3).toString();
@@ -107,7 +107,7 @@ public class Controller implements IRichBolt {
 
 			if (detailList.size() == DBoltNumber) {
 //				for (int i = 0; i < DBoltNumber; ++i)
-//					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_DETAIL_REPORT
+//					jedis.lpush(parameters.getRedisHead() + Parameters.DETAIL_REPORT
 //							+ "-" + detailReportRound + "-all-received", i + "-" + detailList.get(i).getTotalLoad());
 
 				if (parameters.getBalance()) {

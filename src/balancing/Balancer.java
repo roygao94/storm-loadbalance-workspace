@@ -144,7 +144,7 @@ public class Balancer {
 	}
 
 	private static Map<Integer, KGS> getMigrationOutGroup(int i) {
-		Jedis jedis = getConnectedJedis();
+//		Jedis jedis = getConnectedJedis();
 		int cursor = node[i].getCursor();
 		List<KGS> thisNode = new ArrayList<>(node[i].values());
 		Collections.sort(thisNode, new Comparator<KGS>() {

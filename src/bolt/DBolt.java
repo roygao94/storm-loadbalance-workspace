@@ -55,25 +55,23 @@ public class DBolt implements IRichBolt {
 		if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_LOAD + myNumber)) {
 			// emit sum to Controller
 			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-					new Values(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
-			// jedis.lpush(Parameters.REDIS_LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
+					new Values(Parameters.LOAD_REPORT + "-" + loadReportRound++, myNumber, load, ""));
+			// jedis.lpush(Parameters.LOAD_REPORT + "-" + loadReportRound++, myNumber + "-" + load);
 			load = 0;
 			jedis.del(parameters.getRedisHead() + Parameters.REDIS_LOAD + myNumber);
 
-			while (!jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)
-					&& !jedis.exists(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber))
-				;
-
-			if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)) {
-				// emit detail to Controller
-				String detailInfo = getDetailInfo();
-				_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
-						new Values(Parameters.REDIS_DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
-				infoList.clear();
-				jedis.del(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber);
-
-			} else jedis.del(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber);
+//			while (!jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)
+//					&& !jedis.exists(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber))
+//				;
+		} else if (jedis.exists(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber)) {
+			// emit detail to Controller
+			String detailInfo = getDetailInfo();
+			_collector.emitDirect(context.getComponentTasks(Parameters.CONTROLLER_NAME).get(0),
+					new Values(Parameters.DETAIL_REPORT + "-" + detailReportRound++, myNumber, load, detailInfo));
+			infoList.clear();
+			jedis.del(parameters.getRedisHead() + Parameters.REDIS_DETAIL + myNumber);
 		}
+//		else jedis.del(parameters.getRedisHead() + Parameters.REDIS_D_CONTINUE + myNumber);
 
 //		}
 		// record kgs info and put pressure

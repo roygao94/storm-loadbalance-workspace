@@ -24,9 +24,9 @@ public class Parameters implements Serializable {
 	public static final double[] skew = new double[]{0.75, 0.8, 0.85, 0.9, 0.95, 1};
 
 	public static final String REDIS_LOAD = "load";
-	public static final String REDIS_LOAD_REPORT = "load-report";
+	public static final String LOAD_REPORT = "load-report";
 	public static final String REDIS_DETAIL = "detail";
-	public static final String REDIS_DETAIL_REPORT = "detail-report";
+	public static final String DETAIL_REPORT = "detail-report";
 	public static final String REDIS_D_CONTINUE = "d-continue";
 	public static final String REDIS_U_WAIT = "u-wait";
 
