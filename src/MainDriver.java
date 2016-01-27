@@ -126,14 +126,14 @@ public class MainDriver {
 
 		builder.setSpout(Parameters.SPOUT_NAME, new RedisQueueSpout(parameters), 1);
 
-		builder.setBolt(Parameters.UBOLT_NAME,
+		builder.setBolt(Parameters.U_BOLT_NAME,
 				new UBolt(parameters), 10).shuffleGrouping(Parameters.SPOUT_NAME);
-		builder.setBolt(Parameters.DBOLT_NAME,
-				new DBolt(parameters), 10).directGrouping(Parameters.UBOLT_NAME);
+		builder.setBolt(Parameters.D_BOLT_NAME,
+				new DBolt(parameters), 10).directGrouping(Parameters.U_BOLT_NAME);
 
 //		if (parameters.BALANCE)
 		builder.setBolt(Parameters.CONTROLLER_NAME,
-				new Controller(parameters), 1).directGrouping(Parameters.DBOLT_NAME);
+				new Controller(parameters), 1).directGrouping(Parameters.D_BOLT_NAME);
 	}
 
 	private static void startTopology(TopologyBuilder builder, ReportManager manager,
@@ -155,12 +155,12 @@ public class MainDriver {
 //	private static void setTopology(TopologyBuilder builder, ReportManager manager, String mode) {
 //		builder.setSpout(Parameters.SPOUT_NAME, new RedisQueueSpout(mode, Parameters.REDIS_PORT), 1);
 //
-//		builder.setBolt(Parameters.UBOLT_NAME,
+//		builder.setBolt(Parameters.U_BOLT_NAME,
 //				new UBolt(mode, Parameters.REDIS_PORT), 10).shuffleGrouping(Parameters.SPOUT_NAME);
-//		builder.setBolt(Parameters.DBOLT_NAME,
-//				new DBolt(mode, Parameters.REDIS_PORT), 10).directGrouping(Parameters.UBOLT_NAME);
+//		builder.setBolt(Parameters.D_BOLT_NAME,
+//				new DBolt(mode, Parameters.REDIS_PORT), 10).directGrouping(Parameters.U_BOLT_NAME);
 //		builder.setBolt(Parameters.CONTROLLER_NAME,
-//				new Controller(mode, Parameters.REDIS_PORT), 1).directGrouping(Parameters.DBOLT_NAME);
+//				new Controller(mode, Parameters.REDIS_PORT), 1).directGrouping(Parameters.D_BOLT_NAME);
 //
 //		manager.initialize(mode, Parameters.REDIS_PORT, 10);
 //	}

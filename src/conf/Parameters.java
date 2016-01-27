@@ -32,8 +32,8 @@ public class Parameters implements Serializable {
 
 	public static final String DEFAULT_TOPOLOGY_NAME = "load-balance-driver";
 	public static final String SPOUT_NAME = "spout";
-	public static final String UBOLT_NAME = "u-bolt";
-	public static final String DBOLT_NAME = "d-bolt";
+	public static final String U_BOLT_NAME = "u-bolt";
+	public static final String D_BOLT_NAME = "d-bolt";
 	public static final String CONTROLLER_NAME = "controller";
 
 	public static long REPORT_TIME = 10000;

@@ -30,7 +30,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 	private String skewName;
 	private long len = 0;
 	private static int index;
-	private static int cycle;
+	private static int count;
 	private static int loop;
 	private static List<String> mySkew;
 	//	private long lastWrite = 0;
@@ -52,10 +52,10 @@ public class RedisQueueSpout extends BaseRichSpout {
 	@Override
 	public void open(Map map, TopologyContext context, SpoutOutputCollector collector) {
 		_collector = collector;
-		UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
-		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
+		UBoltNumber = context.getComponentTasks(Parameters.U_BOLT_NAME).size();
+		DBoltNumber = context.getComponentTasks(Parameters.D_BOLT_NAME).size();
 		index = 0;
-		cycle = 0;
+		count = 0;
 		loop = 0;
 	}
 
@@ -65,7 +65,7 @@ public class RedisQueueSpout extends BaseRichSpout {
 		if (jedis == null)
 			return;
 
-		if (cycle == 0 && index == 0) {
+		if (count == 0 && index == 0) {
 			len = jedis.llen(Parameters.REDIS_SKEW + "-" + Parameters.skew[loop]);
 			reportSkew();
 		}
@@ -80,14 +80,14 @@ public class RedisQueueSpout extends BaseRichSpout {
 		Object text = mySkew.get(index);
 		if (++index >= len) {
 			index = 0;
-			cycle++;
-			if (cycle % 3 == 0)
+			count++;
+			if (count % 3 == 0)
 				for (int i = 0; i < DBoltNumber; ++i)
 					jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_LOAD + i, "");
-			if (cycle >= 8) {
+			if (count >= 8) {
 //			for (int i = 0; i < UBoltNumber; ++i)
 //				jedis.lpush(parameters.getRedisHead() + Parameters.REDIS_U_WAIT + i, "");
-				cycle = 0;
+				count = 0;
 				if (++loop >= Parameters.skew.length)
 					loop = 0;
 			}

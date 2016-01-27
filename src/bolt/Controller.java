@@ -48,8 +48,8 @@ public class Controller implements IRichBolt {
 	public void prepare(Map map, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		_collector = collector;
-		UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
-		DBoltNumber = context.getComponentTasks(Parameters.DBOLT_NAME).size();
+		UBoltNumber = context.getComponentTasks(Parameters.U_BOLT_NAME).size();
+		DBoltNumber = context.getComponentTasks(Parameters.D_BOLT_NAME).size();
 
 		loadList = new HashMap<>();
 		detailList = new HashMap<>();
@@ -123,7 +123,7 @@ public class Controller implements IRichBolt {
 						for (Map.Entry<Integer, Integer> entry : newRouting.entrySet())
 							routingInfo += entry.getKey() + ":" + entry.getValue() + "\t";
 
-						int UBoltNumber = context.getComponentTasks(Parameters.UBOLT_NAME).size();
+						int UBoltNumber = context.getComponentTasks(Parameters.U_BOLT_NAME).size();
 						for (int i = 0; i < UBoltNumber; ++i)
 							jedis.set(parameters.getRedisHead() + Parameters.REDIS_RT + i, routingInfo);
 //						jedis.set(parameters.getRedisHead() + "routing-" + detailReportRound, routingInfo);
