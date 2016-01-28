@@ -12,7 +12,7 @@ public class BalanceInfo {
 	private long time;
 	private long cost;
 	private Map<Integer, Integer> routingTable;
-	private Map<Pair<Integer, Integer>, Integer> migrationPlan;
+	private Map<Pair<Integer, Integer>, Pair<Integer, Integer>> migrationPlan;
 	private List<Integer> unrelated;
 
 	public BalanceInfo() {
@@ -30,7 +30,7 @@ public class BalanceInfo {
 		this.routingTable = routingTable;
 	}
 
-	public void setMigrationPlan(Map<Pair<Integer, Integer>, Integer> migrationPlan) {
+	public void setMigrationPlan(Map<Pair<Integer, Integer>, Pair<Integer, Integer>> migrationPlan) {
 		this.migrationPlan = migrationPlan;
 	}
 
@@ -54,7 +54,7 @@ public class BalanceInfo {
 		return routingTable;
 	}
 
-	public Map<Pair<Integer, Integer>, Integer> getMigrationPlan() {
+	public Map<Pair<Integer, Integer>, Pair<Integer, Integer>> getMigrationPlan() {
 		return migrationPlan;
 	}
 

@@ -188,10 +188,11 @@ public class Controller implements IRichBolt {
 
 			writer2.write("\n|\n");
 
-			for (Map.Entry<Pair<Integer, Integer>, Integer> entry
+			for (Map.Entry<Pair<Integer, Integer>, Pair<Integer, Integer>> entry
 					: info.getMigrationPlan().entrySet())
 				writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
-						+ "," + entry.getValue() + "\n");
+						+ "," + entry.getValue().getFirst() + entry.getValue().getSecond()
+						+ "," + entry.getValue().getFirst() + "," + entry.getValue().getSecond() + "\n");
 			writer2.close();
 
 			if (parameters.isRemoteMode()) {

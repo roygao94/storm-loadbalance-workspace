@@ -4,6 +4,7 @@ import balancing.util.*;
 import conf.Parameters;
 import redis.clients.jedis.Jedis;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -24,7 +25,7 @@ public class Balancer {
 		}
 	});
 	public static Map<Integer, Integer> routing;
-	public static Map<Pair<Integer, Integer>, Integer> migrationPlan;
+	public static Map<Pair<Integer, Integer>, Pair<Integer, Integer>> migrationPlan;
 
 	private static transient Jedis jedis;
 
@@ -287,17 +288,28 @@ public class Balancer {
 			migrationPlan = new HashMap<>();
 		int cost = 0;
 
+		int[][] normalMigration = new int[N][N];
+		int[][] migrationBack = new int[N][N];
+		Arrays.fill(normalMigration, 0);
+		Arrays.fill(migrationBack, 0);
+
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : copyOfNode[i].values()) {
 				if (!node[i].containsKey(kgs.getKey())) {
 					for (int j = 0; j < N; ++j)
 						if (node[j].containsKey(kgs.getKey())) {
-							Pair<Integer, Integer> fromTo = new Pair<>(i, j);
-							if (migrationPlan.containsKey(fromTo))
-								migrationPlan.put(fromTo, migrationPlan.get(fromTo) + kgs.getG());
+							if (kgs.getKey() % N == j)
+								// migrate back
+								migrationBack[i][j] += kgs.getG();
 							else
-								migrationPlan.put(fromTo, kgs.getG());
-							break;
+								// normal migration
+								normalMigration[i][j] += kgs.getG();
+//							Pair<Integer, Integer> fromTo = new Pair<>(i, j);
+//							if (migrationPlan.containsKey(fromTo))
+//								migrationPlan.put(fromTo, migrationPlan.get(fromTo) + kgs.getG());
+//							else
+//								migrationPlan.put(fromTo, kgs.getG());
+//							break;
 						}
 
 					cost += kgs.getS();
@@ -306,6 +318,12 @@ public class Balancer {
 				}
 				history[kgs.getKey()].add(kgs.getS());
 			}
+
+		for (int i = 0; i < N ; ++i)
+			for (int j = 0; j < N; ++j)
+				if (normalMigration[i][j] != 0 || migrationBack[i][j] != 0)
+					migrationPlan.put(new Pair<>(i, j),
+							new Pair<>(normalMigration[i][j], migrationBack[i][j]));
 
 		return cost;
 	}
