@@ -50,11 +50,6 @@ public class MainDriver {
 
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology(Parameters.DEFAULT_TOPOLOGY_NAME, conf, builder.createTopology());
-//
-//			manager.setLimit(Parameters.LOCAL_TIME);
-//			Thread thread = new Thread(manager);
-//			thread.setDaemon(true);
-//			thread.start();
 
 			Thread.sleep(Parameters.LOCAL_TIME);
 			cluster.shutdown();
@@ -94,30 +89,41 @@ public class MainDriver {
 					}
 			}
 
-
-			File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
-			if (!tempDir.exists())
-				tempDir.mkdirs();
-			BufferedWriter writer = new BufferedWriter(
-					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/load.txt"));
-			writer.write("d-bolt " + 0 + "," + 0);
-			for (int i = 1; i < Parameters.DBOLT_NUMBER; ++i)
-				writer.write("\nd-bolt " + i + "," + 0);
-			writer.close();
-
-			BufferedWriter writer1 = new BufferedWriter(
-					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
-			writer1.write("--\n");
-			writer1.write("--");
-			writer1.close();
-
-			BufferedWriter writer2 = new BufferedWriter(
-					new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"));
-			writer2.close();
+			initializeFiles(parameters);
 
 			startTopology(builder, manager, conf, parameters);
 
 		} else errorArgs();
+	}
+
+	private static void initializeFiles(Parameters parameters) throws IOException {
+		File tempDir = new File(parameters.getBaseDir() + parameters.getTopologyName());
+		if (!tempDir.exists())
+			tempDir.mkdirs();
+		BufferedWriter writer = new BufferedWriter(
+				new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/load.txt"));
+		writer.write("d-bolt " + 0 + "," + 0);
+		for (int i = 1; i < Parameters.DBOLT_NUMBER; ++i)
+			writer.write("\nd-bolt " + i + "," + 0);
+		writer.close();
+
+		BufferedWriter writer1 = new BufferedWriter(
+				new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/rebalance.txt"));
+		writer1.write("--\n");
+		writer1.write("--");
+		writer1.close();
+
+		BufferedWriter writer2 = new BufferedWriter(
+				new FileWriter(parameters.getBaseDir() + parameters.getTopologyName() + "/migration.txt"));
+		writer2.close();
+	}
+
+	private static void startTopology(TopologyBuilder builder, ReportManager manager,
+	                                  Config conf, Parameters parameters) throws Exception {
+		setup(builder, parameters);
+
+		conf.setNumWorkers(22);
+		StormSubmitter.submitTopologyWithProgressBar(parameters.getTopologyName(), conf, builder.createTopology());
 	}
 
 	private static void setup(TopologyBuilder builder, Parameters parameters) throws IOException {
@@ -134,22 +140,6 @@ public class MainDriver {
 //		if (parameters.BALANCE)
 		builder.setBolt(Parameters.CONTROLLER_NAME,
 				new Controller(parameters), 1).directGrouping(Parameters.D_BOLT_NAME);
-	}
-
-	private static void startTopology(TopologyBuilder builder, ReportManager manager,
-	                                  Config conf, Parameters parameters) throws Exception {
-		setup(builder, parameters);
-
-		conf.setNumWorkers(22);
-		StormSubmitter.submitTopologyWithProgressBar(parameters.getTopologyName(), conf, builder.createTopology());
-
-//		if (parameters.BALANCE) {
-//		manager.initialize(parameters, 10);
-//
-//		Thread thread = new Thread(manager);
-//		// thread.setDaemon(true);
-//		thread.start();
-//		}
 	}
 
 //	private static void setTopology(TopologyBuilder builder, ReportManager manager, String mode) {
