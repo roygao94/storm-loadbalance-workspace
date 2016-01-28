@@ -1,13 +1,15 @@
 package test;
 
 import backtype.storm.tuple.Values;
+import org.junit.Test;
 
 /**
  * Created by roy on 1/15/16.
  */
 public class ValuesTest {
 
-	public static void main(String[] args) {
+	@Test
+	public void valueTest() {
 		Values val = new Values("666", 3, 31, false);
 
 		String a = val.get(0).toString();

@@ -1,13 +1,19 @@
 package test;
 
-import java.util.*;
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * Created by roy on 1/17/16.
  */
 public class SetTest {
 
-	public static void main(String[] args) {
+	@Test
+	public void setTest() {
 		long start = System.currentTimeMillis();
 		int num;
 		Set<Integer> set;

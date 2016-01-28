@@ -290,8 +290,10 @@ public class Balancer {
 
 		int[][] normalMigration = new int[N][N];
 		int[][] migrationBack = new int[N][N];
-		Arrays.fill(normalMigration, 0);
-		Arrays.fill(migrationBack, 0);
+		for (int i = 0; i < N; ++i) {
+			Arrays.fill(normalMigration[i], 0);
+			Arrays.fill(migrationBack[i], 0);
+		}
 
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : copyOfNode[i].values()) {

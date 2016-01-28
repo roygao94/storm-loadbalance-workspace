@@ -5,6 +5,8 @@ import balancing.Balancer;
 import balancing.util.KGS;
 import balancing.util.NodeWithCursor;
 import balancing.util.Pair;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,7 +19,8 @@ import java.util.Map;
  */
 public class NodeTest {
 
-	public static void main(String[] args) throws IOException {
+	@Test
+	public void nodeTest() throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader("equal-10000.txt"));
 		int[] skew = new int[10001];
 		NodeWithCursor[] node = new NodeWithCursor[10];
@@ -41,12 +44,13 @@ public class NodeTest {
 		}
 
 		BalanceInfo info = Balancer.reBalance(nodeList, 0.1);
+		Assert.assertTrue("routing size:\t", info.getRoutingSize() != 0);
+
 		System.out.println("time:\t" + info.getTime());
-		System.out.println("routing size:\t" + info.getRoutingSize());
 		System.out.println("cost:\t" + info.getCost());
-		for (Map.Entry<Pair<Integer, Integer>, Integer> entry : info.getMigrationPlan().entrySet())
+		for (Map.Entry<Pair<Integer, Integer>, Pair<Integer, Integer>> entry : info.getMigrationPlan().entrySet())
 			System.out.println(entry.getKey().getFirst() + " --> " + entry.getKey().getSecond()
-					+ "\t" + entry.getValue());
+					+ "\t" + entry.getValue().getFirst() + entry.getValue().getSecond());
 		for (Map.Entry<Integer, Integer> entry : info.getRoutingTable().entrySet())
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 
@@ -68,12 +72,13 @@ public class NodeTest {
 		}
 
 		info = Balancer.reBalance(nodeList, 0.1);
+		Assert.assertTrue("routing size:\t", info.getRoutingSize() != 0);
+
 		System.out.println("time:\t" + info.getTime());
-		System.out.println("routing size:\t" + info.getRoutingSize());
 		System.out.println("cost:\t" + info.getCost());
-		for (Map.Entry<Pair<Integer, Integer>, Integer> entry : info.getMigrationPlan().entrySet())
+		for (Map.Entry<Pair<Integer, Integer>, Pair<Integer, Integer>> entry : info.getMigrationPlan().entrySet())
 			System.out.println(entry.getKey().getFirst() + " --> " + entry.getKey().getSecond()
-					+ "\t" + entry.getValue());
+					+ "\t" + entry.getValue().getFirst() + entry.getValue().getSecond());
 		for (Map.Entry<Integer, Integer> entry : info.getRoutingTable().entrySet())
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 	}
