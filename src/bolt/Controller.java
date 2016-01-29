@@ -191,7 +191,7 @@ public class Controller implements IRichBolt {
 			for (Map.Entry<Pair<Integer, Integer>, Pair<Integer, Integer>> entry
 					: info.getMigrationPlan().entrySet())
 				writer2.write(entry.getKey().getFirst() + "," + entry.getKey().getSecond()
-						+ "," + entry.getValue().getFirst() + entry.getValue().getSecond()
+						+ "," + (entry.getValue().getFirst() + entry.getValue().getSecond())
 						+ "," + entry.getValue().getFirst() + "," + entry.getValue().getSecond() + "\n");
 			writer2.close();
 
