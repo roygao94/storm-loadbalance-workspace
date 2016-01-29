@@ -27,6 +27,9 @@ public class RoutingControlBalancer extends Balancer {
 		for (int i = 0; i < N; ++i)
 			node[i] = nodeList.get(i);
 
+		computeBound(balanceIndex);
+		backup();
+
 		// migrate and ensure routing size
 		int size = getRoutingSize();
 		migrateBack();
