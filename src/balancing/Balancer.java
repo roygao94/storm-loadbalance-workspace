@@ -12,13 +12,13 @@ import java.util.*;
  */
 public class Balancer {
 
-	private static NodeWithCursor[] node;
-	private static NodeWithCursor[] copyOfNode;
-	private static historyS[] history;
-	private static int N;
-	private static int upperBound;
-	private static int lowerBound;
-	private static PriorityQueue<KGS> publicSet = new PriorityQueue<>(Parameters.KEY_NUMBER, new Comparator<KGS>() {
+	protected static NodeWithCursor[] node;
+	protected static NodeWithCursor[] copyOfNode;
+	protected static historyS[] history;
+	protected static int N;
+	protected static int upperBound;
+	protected static int lowerBound;
+	protected static PriorityQueue<KGS> publicSet = new PriorityQueue<>(Parameters.KEY_NUMBER, new Comparator<KGS>() {
 		@Override
 		public int compare(KGS o1, KGS o2) {
 			return -((Integer) o1.getG()).compareTo(o2.getG());
@@ -27,7 +27,7 @@ public class Balancer {
 	public static Map<Integer, Integer> routing;
 	public static Map<Pair<Integer, Integer>, Pair<Integer, Integer>> migrationPlan;
 
-	private static transient Jedis jedis;
+	protected static transient Jedis jedis;
 
 	public static BalanceInfo reBalance(Map<Integer, NodeWithCursor> nodeList, double balanceIndex) {
 		long start = System.currentTimeMillis();
@@ -73,7 +73,7 @@ public class Balancer {
 		// push new routing into redis
 	}
 
-	private static void computeBound(double balanceIndex) {
+	protected static void computeBound(double balanceIndex) {
 		int total = 0;
 		for (int i = 0; i < N; ++i)
 			total += node[i].getTotalLoad();
@@ -84,7 +84,7 @@ public class Balancer {
 		System.out.println(average + "\t" + upperBound);
 	}
 
-	private static void backup() {
+	protected static void backup() {
 		copyOfNode = new NodeWithCursor[N];
 		for (int i = 0; i < N; ++i)
 			copyOfNode[i] = new NodeWithCursor(node[i]);
@@ -101,7 +101,7 @@ public class Balancer {
 //		return count;
 //	}
 
-	private static void updateRouting() {
+	protected static void updateRouting() {
 		if (routing != null)
 			routing.clear();
 		else
@@ -113,7 +113,7 @@ public class Balancer {
 					routing.put(kgs.getKey(), i);
 	}
 
-	private static void migrateBack() {
+	protected static void migrateBack() {
 		List<MigrationKGS> backList = new ArrayList<>();
 		for (int i = 0; i < N; ++i)
 			for (KGS kgs : node[i].values())
@@ -134,7 +134,7 @@ public class Balancer {
 		}
 	}
 
-	private static void migrate() {
+	protected static void migrate() {
 		for (int i = 0; i < N; ++i)
 			if (node[i].getTotalLoad() > upperBound) {
 				Map<Integer, KGS> moveList = getMigrationOutGroup(i);
@@ -144,7 +144,7 @@ public class Balancer {
 		putPublicSetToLowNodes();
 	}
 
-	private static Map<Integer, KGS> getMigrationOutGroup(int i) {
+	protected static Map<Integer, KGS> getMigrationOutGroup(int i) {
 //		Jedis jedis = getConnectedJedis();
 		int cursor = node[i].getCursor();
 		List<KGS> thisNode = new ArrayList<>(node[i].values());
@@ -229,7 +229,7 @@ public class Balancer {
 		}
 	}
 
-	private static void putPublicSetToLowNodes() {
+	protected static void putPublicSetToLowNodes() {
 		PriorityQueue<Pair<Integer, Integer>> low = new PriorityQueue<>(N, new Comparator<Pair<Integer, Integer>>() {
 			@Override
 			public int compare(Pair<Integer, Integer> o1, Pair<Integer, Integer> o2) {
@@ -281,7 +281,7 @@ public class Balancer {
 		}
 	}
 
-	private static int getCostAndMigrationPlan() {
+	protected static int getCostAndMigrationPlan() {
 		if (migrationPlan != null)
 			migrationPlan.clear();
 		else
@@ -330,7 +330,7 @@ public class Balancer {
 		return cost;
 	}
 
-	private static Jedis getConnectedJedis() {
+	protected static Jedis getConnectedJedis() {
 		if (jedis != null)
 			return jedis;
 
